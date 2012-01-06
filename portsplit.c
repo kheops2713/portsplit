@@ -55,17 +55,19 @@ int connectPort[nservices];
 char const optchar[nservices] = { 'H', 'V', 'T', 'O' };
 char *execcmd[nservices];
 char **execarg[nservices];
-char const *descriptions[nservices] = { "HTTP", "OpenVPN", "Timeout [NOT YET IMPLEMENTED]", "Other" };
+char const *descriptions[nservices] = { "HTTP", "OpenVPN", "Timeout", "Other" };
 int is_pty[nservices];
 int is_set[nservices];
 int timeout_sec;
 
-void close_all (int const[], int const[], int const[], int);
-void start_child (int, int, struct sockaddr_in);
+void start_child (int, struct sockaddr_in);
 int treat_client (int, struct sockaddr_in);
 int connect_host (char const*, int);
 int connect_one (struct addrinfo const*);
 static char* now (char const*);
+int start_proxying (int, int*, int*);
+int detect_service (char*, int);
+
 
 int main (int argc, char **argv)
 {
@@ -75,7 +77,7 @@ int main (int argc, char **argv)
   memset (is_pty, 0, nservices * sizeof(int));
   memset (is_set, 0, nservices * sizeof(int));
 
-  timeout_sec = 10;
+  timeout_sec = 60;
 
   unsigned int iservice;
   for (iservice = 0; iservice < nservices; iservice++)
@@ -93,14 +95,17 @@ int main (int argc, char **argv)
   int sockfd, fdlisten, maxfd, ackfd;
   unsigned int nbconn = 0;
   fd_set fdset;
-  int pipefd[2];
+  int needhelp = 0;
 
   int optch;
   int prevsrv = nservices;
-  while ((optch = getopt (argc, argv, "H:O:V:T:l:a:pt:")) != -1)
+  while ((optch = getopt (argc, argv, "hH:O:V:T:l:a:pt:")) != -1)
     {
       switch (optch)
 	{
+	case 'h':
+	  needhelp = 1;
+	  break;
 	case 'H':
 	case 'O':
 	case 'V':
@@ -212,7 +217,7 @@ int main (int argc, char **argv)
 	}
     }
     
-  if (!listenPort || (!connectPort[other] && execcmd[other] == NULL))
+  if (!listenPort || needhelp)
     {
       printf ("Syntax: %s ", argv[0]);
 
@@ -223,13 +228,13 @@ int main (int argc, char **argv)
 
       printf (" [!command [-a arg1 -a arg2 ...] [-p]|[host:]port] ... -l [IP:]port [-t timeout]\n\n");
        
-      printf ("Proxyable services - at least 'O' must be defined:\n");
+      printf ("Proxyable services:\n");
       for (iservice = 0; iservice < nservices; iservice++)
 	printf ("-%c - %s\n", optchar[iservice], descriptions[iservice]);
 
       printf ("\nListening options (mandatory):\n");
       printf ("-l [IP:]port - Listen on given TCP port, bind on specified IP (default 127.0.0.1)\n");
-      printf ("-t timeout - Timeout value (in seconds) to handle connection to \"Timeout\" service\n\n");
+      printf ("-t timeout - Timeout value (in seconds) to handle connection to \"Timeout\" service (default: %d)\n\n", timeout_sec);
 
       printf ("Proxying syntax (one or the other for each service):\n");
       printf ("[host:]port - Connect to given TCP port on given host (default 127.0.0.1)\n");
@@ -237,7 +242,7 @@ int main (int argc, char **argv)
       printf ("-a arg1 -a arg2 ... - Only with !command. Pass arguments to the command.\n");
       printf ("-p - Make stdin/stdout of subprocess into a pseudoterminal (useful for pppd)\n");
 
-      return -1;
+      return 0;
     }
 
   for (iservice = 0; iservice < nservices; iservice++)
@@ -287,18 +292,22 @@ int main (int argc, char **argv)
   FD_ZERO (&fdset);
   FD_SET (sockfd, &fdset);
 
-  if (pipe(pipefd) == -1)
+  struct timeval refresh = { 10, 0 };
+  maxfd = sockfd;
+  int selret;
+  while ((selret = select (maxfd + 1, &fdset, NULL, NULL, &refresh)) >= 0)
     {
-      perror ("pipe()");
-      return -1;
-    }
-  
-  FD_SET (pipefd[0], &fdset);
+      refresh.tv_sec = 10;
+      refresh.tv_usec = 0;
+      
+      /* Check for dead children */
+      pid_t deadpid;
+      while ((deadpid = waitpid (-1, NULL, WNOHANG)) > 0)
+	{
+	  nbconn--;
+	  printf ("%s -> Connection number is now %d/%d\n", now(DT_FMT), nbconn, maxconn);
+	}
 
-  maxfd = ((pipefd[0] > sockfd) ? pipefd[0] : sockfd);
-
-  while (select (maxfd + 1, &fdset, NULL, NULL, NULL))
-    {
       /* New connection incuming */
       if (FD_ISSET (sockfd, &fdset))
 	{
@@ -306,12 +315,12 @@ int main (int argc, char **argv)
 	  int s = sizeof(struct sockaddr);
 	  if ((ackfd = accept (sockfd, (struct sockaddr*)&inbound, &s)) != -1)
 	    {
-
+	      
 	      pid_t pid;
 	      pid = fork();
 	      if (pid == 0)
 		{
-		  start_child (pipefd[1], ackfd, inbound);
+		  start_child (ackfd, inbound);
 		  exit (0);
 		}
 	      else if (pid > 0)
@@ -322,53 +331,31 @@ int main (int argc, char **argv)
 		}
 	    }
 	}
-      
-      /* A child told us something */
-      if (FD_ISSET (pipefd[0], &fdset))
-	{
-	  char l;
-	  read (pipefd[0], &l, 1);
 
-	  char fd_to_close[(int)l + 1];
-	  read (pipefd[0], fd_to_close, (int)l);
-	  fd_to_close[(int)l] = 0;
-
-	  nbconn--;
-
-	  printf ("%s -> Connection number is now %d/%d\n", now(DT_FMT), nbconn, maxconn);
-	}
-
+      FD_ZERO (&fdset);
       FD_SET (sockfd, &fdset);
-      FD_SET (pipefd[0], &fdset);
+      maxfd = sockfd;
     }
   
   return 0;
 }
 
-void start_child (int pipefd, int clientfd, struct sockaddr_in addr)
+void start_child (int clientfd, struct sockaddr_in addr)
 {
-  char clientfdstr[42];
-  memset (clientfdstr, 0, 42 * sizeof(char));
-  sprintf (clientfdstr, "%d", clientfd);
-  char l = (char) strlen (clientfdstr);
-
   printf ("[%s/%d] Connection accepted on FD %d from IP %s\n", now(DT_FMT), getpid(), clientfd, inet_ntoa(addr.sin_addr));
   treat_client (clientfd, addr);
   printf ("[%s/%d] Connection terminated\n", now(DT_FMT), getpid());
-  
-  /* Just tell the father process we are terminating - guess we should use wait() instead */
-  write (pipefd, &l, 1);
-  write (pipefd, clientfdstr, (int)l);
 }
 
 int treat_client (int clientfd, struct sockaddr_in addr)
 {
   unsigned int prebuflen = 2048, prefill = 0, buflen = 512;
   char prebuffer[prebuflen], buffer[buflen];
-  int serverfd = 0, serverread = 0, serverwrite = 0, maxfd, selret;
+  int serverread = 0, serverwrite = 0, maxfd, selret;
   fd_set fdset, timeout_fdset;
   pid_t server_process = -1;
-  struct timeval timeout = { timeout_sec, 0 };
+  struct timeval stimeout = { timeout_sec, 0 };
+  struct timeval *ptimeout = &stimeout;
   
   FD_ZERO (&fdset);
   FD_ZERO (&timeout_fdset);
@@ -377,22 +364,40 @@ int treat_client (int clientfd, struct sockaddr_in addr)
   FD_SET (clientfd, &timeout_fdset);
   maxfd = clientfd;
 
-  /* select() returns ZERO in case of timeout ~o~ */
-  while (select (maxfd + 1, &fdset, NULL, NULL, &timeout))
+  while ((selret = select (maxfd + 1, &fdset, NULL, NULL, ptimeout)) >= 0)
     {
-      if (FD_ISSET (clientfd, &fdset))
+      ptimeout = NULL;
+
+      if (selret == 0) /* timeout */
 	{
-	  int r = read (clientfd, buffer, buflen);
+	  if (is_set[timeout])
+	    {
+	      if ((server_process = start_proxying (timeout, &serverread, &serverwrite)) == -1)
+		{
+		  close (clientfd);
+		  return -1;
+		}
+	    }
+	  else
+	    {
+	      close (clientfd);
+	      return 0;
+	    }
+	}
+
+      else if (FD_ISSET (clientfd, &fdset))
+	{
+	  int r = 0;
+	  r = read (clientfd, buffer, buflen);
 
 	  if (r > 0)
 	    {
 #ifdef DEBUG
-	      printf ("[%s/%d] Read %d bytes from FD %d\n", now(DT_FMT), getpid(), r, clientfd);
+	      printf ("[%s/%d] Read %d bytes from client FD %d\n", now(DT_FMT), getpid(), r, clientfd);
 #endif
-
 	      int overflow = 0;
 
-	      if (serverwrite == 0)
+	      if (serverwrite == 0) /* not connected yet */
 		{
 #ifdef DEBUG
 		  printf ("[%s/%d] Buffering...\n", now(DT_FMT), getpid());
@@ -401,36 +406,24 @@ int treat_client (int clientfd, struct sockaddr_in addr)
 		    {
 		      memcpy (prebuffer + prefill, buffer, r);
 		      prefill += r;
+
+		      r = 0;
 		    }
-		  else
-		    overflow = 1;
 
 		  if (prefill > 5) // need to decide where to connect
 		    {
 		      int service_id;
-
-		      /* HTTP case */
-		      if (strncmp (prebuffer, "GET", 3) == 0 ||
-			  strncmp (prebuffer, "POST", 4) == 0 ||
-			  strncmp (prebuffer, "TRACE", 5) == 0 ||
-			  strncmp (prebuffer, "HEAD", 4) == 0)
+		      if  ((service_id = detect_service (prebuffer, prefill)) < 0)
 			{
-			  service_id = http;
-			}
-		      
-		      /* OpenVPN case */
-		      else if (prebuffer[0] == 0x00 && prebuffer[1] == 0x0E && prebuffer[2] == 0x38)
-			{
-			  service_id = openvpn;
-			}
-		      
-		      /* Fallback case */
-		      else
-			{
-			  service_id = other;
+			  close (clientfd);
+			  return -1;
 			}
 
-		      printf ("[%s/%d] Service: %s\n", now(DT_FMT), getpid(), descriptions[service_id]);
+		      printf ("[%s/%d] Service: %s - first bytes: ", now(DT_FMT), getpid(), descriptions[service_id]);
+		      unsigned int ipf = 0;
+		      for (; ipf < prefill; ipf++)
+			printf ("0x%08.8X ", prebuffer[ipf]);
+		      printf ("\n");
 
 		      if (!is_set[service_id])
 			{
@@ -438,103 +431,10 @@ int treat_client (int clientfd, struct sockaddr_in addr)
 			  return 0;
 			}		       
 
-		      if (execcmd[service_id] == NULL) /* proxy to another server */
+		      if ((server_process = start_proxying (service_id, &serverread, &serverwrite)) == -1)
 			{
-			  printf ("[%s/%d] Connect <> %s (%s:%d) [first bytes are 0x%08.8X 0x%08.8X 0x%08.8X 0x%08.8X 0x%08.8X]\n",
-				  now(DT_FMT),
-				  getpid(),
-				  descriptions[service_id],
-				  connectHost[service_id],
-				  connectPort[service_id],
-				  prebuffer[0], prebuffer[1], prebuffer[2], prebuffer[3], prebuffer[4]);
-			  
-
-			  if ((serverfd = connect_host (connectHost[service_id], connectPort[service_id])) == -1)
-			    {
-			      close (clientfd);
-			      return -1;
-			    }
-			  else
-			    {
-			      serverread = serverwrite = serverfd;
-			    }
-
-			}
-		      else /* launch a subprocess, possibly using a PTY */
-			{
-			  printf ("[%s/%d] Pipe <> %s [first bytes are 0x%08.8X 0x%08.8X 0x%08.8X 0x%08.8X 0x%08.8X]\n",
-				  now(DT_FMT),
-				  getpid(),
-				  descriptions[service_id],
-				  prebuffer[0], prebuffer[1], prebuffer[2], prebuffer[3], prebuffer[4]);
-			  
-			  int pty[2];
-			  char tty[128];
-			  int pipefd[4];
-			  
-			  if (is_pty[service_id])
-			    {
-			      if (openpty (pty, pty+1, tty, NULL, NULL) == -1)
-				{
-				  printf ("[%s/%d] Could not open PTY: %s\n", now(DT_FMT), getpid(), strerror(errno));
-				  return -1;
-				}
-			      printf ("[%s/%d] Opened %s for server subprocess communication via standard input/output\n", now(DT_FMT), getpid(), tty);
-			      serverread = serverwrite = pty[0];
-			    }
-			  else
-			    {
-			      pipe (pipefd);
-			      pipe (pipefd + 2);
-
-			      serverread = pipefd[0];
-			      serverwrite = pipefd[3];
-
-			      printf ("[%s/%d] Read from server subprocess on FD %d, write on FD %d\n", now(DT_FMT), getpid(), serverread, serverwrite);
-			    }
-
-			  server_process = fork();
-			  if (server_process == 0) /* child process */
-			    {
-			      /* stdout is fd 1, stderr is fd 2, stdin is fd 0 */
-			      /* child's stdout will be  ... serverread for us */
-			      /* child's stdin will be serverwrite for us */
-
-			      if (is_pty[service_id])
-				{
-				  close (pty[0]);
-				  dup2 (pty[1], 1);
-				  dup2 (pty[1], 0);
-				  close(pty[1]); /* Don't know why: taken from stunnel source code */
-				}
-			      else
-				{
-				  dup2 (pipefd[1], 1); // send stdout to the pipe (for reading by main process)
-				  dup2 (pipefd[2], 0); // read stdin from the pipe (for writing by main process)
-			      
-				  close (pipefd[0]);
-				  close (pipefd[3]);
-				}
-
-			      execvp (execcmd[service_id], execarg[service_id]);
-
-			      printf ("Subprocess did not start: %s\n", strerror(errno));
-			    }
-			  else if (server_process > 0) /* parent process  */
-			    {
-			      if (is_pty[service_id])
-				close (pty[1]);
-			      else
-				{
-				  close (pipefd[1]);
-				  close (pipefd[2]);
-				}
-			    }
-			  else /* fork did not find its knife */
-			    {
-			      printf ("[%d] Could not fork: %s\n", getpid(), strerror(errno));
-			      return -1;
-			    }
+			  close (clientfd);
+			  return -1;
 			}
 
 		      /* Here we need to write to the server the prebuffer content, after a successful connection */
@@ -547,17 +447,10 @@ int treat_client (int clientfd, struct sockaddr_in addr)
 			  close (serverread);
 			  return -1;
 			}
-		      if (overflow && (pw = write (serverfd, buffer, r)) < r)
-			{
-			  printf ("[%s/%d] Pre-buffer overflow short write to server (%d out of %d)\n", now(DT_FMT), getpid(), pw, r);
-			  close (clientfd);
-			  close (serverwrite);
-			  close (serverread);
-			  return -1;
-			}
 		    }
 		}
-	      else /* already connected to server */
+
+	      if (serverwrite != 0 && r > 0) /* already connected to server (serverwrite != 0) */
 		{
 		  int w = write (serverwrite, buffer, r);
 		  if (w < r && w >= 0)
@@ -568,7 +461,7 @@ int treat_client (int clientfd, struct sockaddr_in addr)
 		      close (serverread);
 		      return -1;
 		    }
-		  else if (r <0)
+		  else if (w < 0)
 		    {
 		      perror("write()");
 		      close (clientfd);
@@ -578,49 +471,37 @@ int treat_client (int clientfd, struct sockaddr_in addr)
 		    }	  
 		}
 	    }
-	  else
+	  else /* r <= 0 */
 	    {
 	      close (clientfd);
 	      printf ("[%s/%d] Disconnected from client FD %d\n", now(DT_FMT), getpid(), clientfd);
 	      close (serverread);
 	      close (serverwrite);
-	      return 0;
+	      return r;
 	    }
 	}
 
       if (serverread > 0 && FD_ISSET(serverread, &fdset))
 	{
-	  int r = read (serverread, buffer, buflen);
+	  int r = read (serverread, buffer, buflen), w;
 #ifdef DEBUG
 	  printf ("[%s/%d] Read %d bytes from server (FD %d)\n", now(DT_FMT), getpid(), r, serverread);
 #endif
-	  if (r < 0)
+	  if (r <= 0)
 	    {
-	      printf ("[%s/%d] Error reading from server :/\n", now(DT_FMT), getpid());
+	      printf ("[%s/%d] %s\n", now(DT_FMT), getpid(), ((r == 0) ? "Server closed connection" : "Error reading from server"));
 	      close (serverread);
 	      close (serverwrite);
 	      close (clientfd);
+	      return r;
+	    }
+	  if ((w = write(clientfd, buffer, r)) < r)
+	    {
+	      printf ("[%s/%d] Short write to client (%d out of %d), giving up.\n", now(DT_FMT), getpid(), w, r);
+	      close (clientfd);
+	      close (serverread);
+	      close (serverwrite);
 	      return -1;
-	    }
-	  else if (r == 0)
-	    {
-	      printf ("[%s/%d] Server closed connection\n", now(DT_FMT), getpid());
-	      close (serverread);
-	      close (serverwrite);
-	      close (clientfd);
-	      return 0;
-	    }
-	  else
-	    {
-	      int w;
-	      if ((w = write(clientfd, buffer, r)) < r)
-		{
-		  printf ("[%s/%d] Short write to client (%d out of %d), giving up.\n", now(DT_FMT), getpid(), w, r);
-		  close (clientfd);
-		  close (serverread);
-		  close (serverwrite);
-		  return -1;
-		}
 	    }
 	}
 
@@ -632,9 +513,7 @@ int treat_client (int clientfd, struct sockaddr_in addr)
       maxfd = ((clientfd > serverread) ? clientfd : serverread);
     }
 
-  printf ("PROUTE !!! :D\n");
-
-  return 0;
+  return -1;
 }
 
 int connect_host (char const *hostname, int port)
@@ -642,7 +521,7 @@ int connect_host (char const *hostname, int port)
   int serverfd = -1;
   char portstr[10];
 
-  printf ("[%d] Looking up %s...\n", getpid(), hostname);
+  printf ("[%s/%d] Looking up %s...\n", now(DT_FMT), getpid(), hostname);
   
   struct addrinfo *result;
   struct addrinfo hint;
@@ -656,7 +535,7 @@ int connect_host (char const *hostname, int port)
 
   if ((retdns = getaddrinfo(hostname, portstr, &hint, &result)) != 0)
     {
-      printf ("[%d] Resolv Fail: %s\n", getpid(), gai_strerror(retdns));
+      printf ("[%s/%d] Resolv Fail: %s\n", now(DT_FMT), getpid(), gai_strerror(retdns));
       return -1;
     }
   
@@ -679,7 +558,7 @@ int connect_one (struct addrinfo const *ai)
   for (p = ai; p != NULL && success == 0; p = p->ai_next)
     {
       if (p->ai_family == AF_INET)
-	printf ("[%d] Trying %s...\n", getpid(), inet_ntoa(((struct sockaddr_in*)p->ai_addr)->sin_addr));
+	printf ("[%s/%d] Trying %s...\n", now(DT_FMT), getpid(), inet_ntoa(((struct sockaddr_in*)p->ai_addr)->sin_addr));
 
       if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
         perror("socket()");
@@ -694,28 +573,12 @@ int connect_one (struct addrinfo const *ai)
 	  else
 	    {
 	      success = 1;
-	      printf ("[%d] Connected.\n", getpid());
+	      printf ("[%s/%d] Connected.\n", now(DT_FMT), getpid());
 	    }
 	}
     }
 
   return ((success == 1) ? sockfd : -1);
-}
-
-void close_all (int const sock[], int const fd[], int const established[], int n)
-{
-  int i;
-  for (i = 0; i < n; i++)
-    {
-      if (established[i])
-	{
-	  close (fd[i]);
-	  perror ("close()");
-	}
-
-      close (sock[i]);
-      perror ("close()");
-    }
 }
 
 static char* now (char const *fmt)
@@ -729,4 +592,137 @@ static char* now (char const *fmt)
   strftime (str, 64, fmt, proute);
 
   return str;
+}
+
+int start_proxying (int service_id, int *serverread, int *serverwrite)
+{
+  int serverfd, server_process = 0;
+
+  if (execcmd[service_id] == NULL) /* proxy to another server */
+    {
+      printf ("[%s/%d] Connect <> %s (%s:%d)\n",
+	      now(DT_FMT),
+	      getpid(),
+	      descriptions[service_id],
+	      connectHost[service_id],
+	      connectPort[service_id]);
+      
+      if ((serverfd = connect_host (connectHost[service_id], connectPort[service_id])) == -1)
+	{
+	  return -1;
+	}
+      else
+	{
+	  *serverread = *serverwrite = serverfd;
+	}
+      
+    }
+  else /* launch a subprocess, possibly using a PTY */
+    {
+      printf ("[%s/%d] Pipe <> %s\n",
+	      now(DT_FMT),
+	      getpid(),
+	      descriptions[service_id]);
+
+      int pty[2];
+      char tty[128];
+      int pipefd[4];
+      
+      if (is_pty[service_id])
+	{
+	  if (openpty (pty, pty+1, tty, NULL, NULL) == -1)
+	    {
+	      printf ("[%s/%d] Could not open PTY: %s\n", now(DT_FMT), getpid(), strerror(errno));
+	      return -1;
+	    }
+	  printf ("[%s/%d] Opened %s for server subprocess communication via standard input/output\n", now(DT_FMT), getpid(), tty);
+	  *serverread = *serverwrite = pty[0];
+	}
+      else
+	{
+	  pipe (pipefd);
+	  pipe (pipefd + 2);
+	  
+	  *serverread = pipefd[0];
+	  *serverwrite = pipefd[3];
+	  
+	  printf ("[%s/%d] Read from server subprocess on FD %d, write on FD %d\n", now(DT_FMT), getpid(), *serverread, *serverwrite);
+	}
+      
+      server_process = fork();
+      if (server_process == 0) /* child process */
+	{
+	  /* stdout is fd 1, stderr is fd 2, stdin is fd 0 */
+	  /* child's stdout will be  ... serverread for us */
+	  /* child's stdin will be serverwrite for us */
+
+	  if (is_pty[service_id])
+	    {
+	      close (pty[0]);
+	      dup2 (pty[1], 1);
+	      dup2 (pty[1], 0);
+	      close(pty[1]); /* Don't know why: taken from stunnel source code */
+	    }
+	  else
+	    {
+	      dup2 (pipefd[1], 1); // send stdout to the pipe (for reading by main process)
+	      dup2 (pipefd[2], 0); // read stdin from the pipe (for writing by main process)
+			      
+	      close (pipefd[0]);
+	      close (pipefd[3]);
+	    }
+
+	  execvp (execcmd[service_id], execarg[service_id]);
+
+	  printf ("Subprocess did not start: %s\n", strerror(errno));
+	}
+      else if (server_process > 0) /* parent process  */
+	{
+	  if (is_pty[service_id])
+	    close (pty[1]);
+	  else
+	    {
+	      close (pipefd[1]);
+	      close (pipefd[2]);
+	    }
+	}
+      else /* fork did not find its knife */
+	{
+	  printf ("[%s/%d] Could not fork: %s\n", now(DT_FMT), getpid(), strerror(errno));
+	  return -1;
+	}
+    }
+
+  return server_process;
+}
+
+int detect_service (char *prebuffer, int prefill)
+{
+  int service_id = -1;
+  
+  if (prefill >= 5)
+    {
+      /* HTTP case */
+      if (strncmp (prebuffer, "GET", 3) == 0 ||
+	  strncmp (prebuffer, "POST", 4) == 0 ||
+	  strncmp (prebuffer, "TRACE", 5) == 0 ||
+	  strncmp (prebuffer, "HEAD", 4) == 0)
+	{
+	  service_id = http;
+	}
+      
+      /* OpenVPN case */
+      else if (prebuffer[0] == 0x00 && prebuffer[1] == 0x0E && prebuffer[2] == 0x38)
+	{
+	  service_id = openvpn;
+	}
+      
+      /* Fallback case */
+      else
+	{
+	  service_id = other;
+	}
+    }
+
+  return service_id;
 }
