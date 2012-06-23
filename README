@@ -1,1 +1,11 @@
-Hello, world:)
+Simple TCP port multiplexer (or "port splitter").
+
+Just run "make" to compile. Binary will be in
+"src" directory.
+
+See example config file in examples directory.
+
+All comments/feedbacks are welcome.
+
+~~~~~~~:)
+KheOps <kheops@ceops.eu>

@@ -1,0 +1,7 @@
+- Daemonization
+- Manage UDP
+- External files with patterns
+- Pattern regex
+- Write manpages
+- Hunt bugs
+- Use libevent instead of select()
