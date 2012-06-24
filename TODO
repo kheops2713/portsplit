@@ -5,3 +5,4 @@
 - Write manpages
 - Hunt bugs
 - Use libevent instead of select()
+- Write a proper README :)
