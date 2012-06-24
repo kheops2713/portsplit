@@ -506,7 +506,26 @@ int could_match (service const *s, char const *str, unsigned int len, unsigned i
   
   if (pattern_index != NULL)
     *pattern_index = idx;
+
   return couldmatch;
+}
+
+int could_match_any (config const *cfg, char const *str, unsigned int len, service const **s, unsigned int *pattern_index)
+{
+  unsigned int i;
+  int found = 0;
+  service const *cur;
+
+  for (i = 0; i < cfg->nservices && !found; i++)
+    {
+      cur = cfg->services[i];
+      found = could_match (cur, str, len, pattern_index);
+    }
+
+  if (s != NULL)
+    *s = cur;
+
+  return found;
 }
 
 void copy_service (service *dst, service const *src)

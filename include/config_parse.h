@@ -67,5 +67,6 @@ void copy_service (service *, service const *);
 service const * service_by_name (config const*, char const*);
 service const * match_service (config const *, char const*, unsigned int, unsigned int*);
 int could_match (service const*, char const *, unsigned int, unsigned int*);
+int could_match_any (config const *, char const *, unsigned int, service const **, unsigned int *);
 
 #endif

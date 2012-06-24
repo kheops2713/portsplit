@@ -36,9 +36,10 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
   char *prebuffer, *readbuffer, *toflush;
   struct timeval stimeout, *ptimeout;
   pid_t server_process = -1;
-  int serverread, serverwrite, selret, r, w, terminate, overflow, established, fwd;
+  int serverread, serverwrite, selret, r, w, terminate, overflow, established, fwd, couldmatch;
   fd_set fdset;
   service const * serv;
+  service const * servfallback;
   
   set_child_ignored_signals();
 
@@ -153,7 +154,12 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 		      prefill += nbytes;
 
 		      serv = match_service (cfg, prebuffer, prefill, &matched_pattern);
-		      if (serv || (prefill == cfg->prebuflen && (serv = service_by_name (cfg, "fallback")) != NULL))
+		      
+		      if ((serv == NULL && prefill < cfg->prebuflen && (couldmatch = could_match_any (cfg, prebuffer, prefill, NULL, NULL)) == 0)
+			  || (serv == NULL && prefill >= cfg->prebuflen))
+			serv = service_by_name (cfg, "fallback");
+
+		      if (serv != NULL)
 			{
 			  now_r (DT_FMT, datetime);
 			  if (strcmp (serv->name, "fallback"))
@@ -192,7 +198,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 			      free (toflush);
 			    }
 			}
-		      else if (prefill == cfg->prebuflen)
+		      else if (prefill >= cfg->prebuflen || couldmatch == 0) /* also serv is NULL so there is no fallback */
 			{
 			  now_r (DT_FMT, datetime);
 			  printf ("%s %d: Don't know what to do, throwing out client.\n", datetime, getpid());

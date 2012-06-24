@@ -22,10 +22,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <sys/socket.h>
 #include <sys/select.h>
-//#include <linux/in.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
@@ -73,26 +73,12 @@ int main_listen_loop (config _cfg)
   struct timeval refresh;
   pid_t deadpid, newpid;
   config oldcfg, *cfg;
-  char *cfgfile, pidstr[9];
+  char *cfgfile, *pidfile, pidstr[9];
   
   cfg = &_cfg;
 
-  if (cfg->pidfile)
-    {
-      sprintf (pidstr, "%d", getpid());
-      if ((s = open (cfg->pidfile, O_WRONLY | O_CREAT | O_EXCL)) != 0)
-	{
-	  fprintf (stderr, "ERROR: could not open file `%s': %s\n", cfg->pidfile, strerror(errno));
-	  return -1;
-	}
-      else if (write (s, pidstr, strlen(pidstr)) < strlen(pidstr))
-	{
-	  fprintf (stderr, "ERROR: could not write PID to `%s'\n", cfg->pidfile);
-	  close (s);
-	  return -1;
-	}
-    }
-
+  sprintf (pidstr, "%d", getpid());
+  
   newconfig = 1;
   nbconn = 0;
 
@@ -106,6 +92,23 @@ int main_listen_loop (config _cfg)
   
   while (newconfig)
     {
+       if (cfg->pidfile)
+	 {
+	   if ((s = open (cfg->pidfile, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR)) < 0)
+	     {
+	       fprintf (stderr, "ERROR: could not open file `%s': %s\n", cfg->pidfile, strerror(errno));
+	       return -1;
+	     }
+	   else if (write (s, pidstr, strlen(pidstr)) < strlen(pidstr))
+	     {
+	       fprintf (stderr, "ERROR: could not write PID to file `%s'\n", cfg->pidfile);
+	       close (s);
+	       return -1;
+	     }
+
+	   close (s);
+	 }
+
       newconfig = 0;
       maxfd = 0;
 
@@ -122,6 +125,10 @@ int main_listen_loop (config _cfg)
       memset (listen_saddr, 0, sizeof(struct sockaddr_in) * cfg->nbind);
       memset (listen_saddr6, 0, sizeof(struct sockaddr_in6) * cfg->nbind);
 
+      terminate = 0;
+      refresh.tv_sec = 10;
+      refresh.tv_usec = 0;
+
       for (i = 0; i < cfg->nbind; i++)
 	{
 	  if (setup_socket (cfg->addr[i], cfg->port[i], sockfd + i, sockfamily + i, listen_saddr + i, listen_saddr6 + i) == -1)
@@ -136,10 +143,6 @@ int main_listen_loop (config _cfg)
 		maxfd = sockfd[i];
 	    }
 	}
-  
-      refresh.tv_sec = 10;
-      refresh.tv_usec = 0;
-      terminate = 0;
   
       while (!terminate)
 	{
@@ -175,7 +178,6 @@ int main_listen_loop (config _cfg)
 			      if (newpid == 0)
 				{
 				  /* Child process - close all unnecessary file descriptors */
-				  /* BUG BUG BUG THE CHILD PROCESS KEEPS THE LISTEN() RUNNING MEHMEH */
 				  for (j = 0; j < cfg->nbind; j++)
 				    close (sockfd[j]);
 				  child_ret = treat_client (ackfd, &inbound, sockfamily[i], cfg);
@@ -214,11 +216,23 @@ int main_listen_loop (config _cfg)
 
 		      cfgfile = malloc (strlen(cfg->filename) + 1);
 		      strcpy (cfgfile, cfg->filename);
+		      if (cfg->pidfile != NULL)
+			{
+			  pidfile = malloc (strlen (cfg->pidfile) + 1);
+			  strcpy (pidfile, cfg->pidfile);
+			}
+		      else
+			pidfile = NULL;
 
 		      oldcfg = *cfg; /* Copy content, references will still be valid */
 
 		      if (parse_config_file (cfgfile, cfg) == 0)
-			newconfig = 1;
+			{
+			  if (pidfile != NULL && remove(pidfile) == -1)
+			    fprintf (stderr, "ERROR: Could not remove PID file `%s': %s\n", pidfile, strerror(errno));
+			  else
+			    newconfig = 1;	  
+			}
 		      
 		      for (i = 0; i < oldcfg.nbind; i++)
 			close (sockfd[i]);
@@ -252,6 +266,9 @@ int main_listen_loop (config _cfg)
 
   close (sigfd[0]);
   close (sigfd[1]);
+
+  if (cfg->pidfile != NULL && remove (cfg->pidfile) == -1)
+    fprintf (stderr, "ERROR: Could not remove PID file `%s': %s\n", cfg->pidfile, strerror(errno));
 
   free (listen_saddr);
   free (listen_saddr6);
