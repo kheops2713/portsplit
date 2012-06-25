@@ -316,12 +316,11 @@ int connect_host (char const *hostname, int port)
 {
   int serverfd = -1;
   char portstr[10];
-
-  printf ("%s %d: Looking up %s...\n", now(DT_FMT), getpid(), hostname);
-
   struct addrinfo *result;
   struct addrinfo hint;
   int retdns;
+
+  printf ("%s %d: Looking up %s...\n", now(DT_FMT), getpid(), hostname);
 
   memset (portstr, 0, 10 * sizeof(char));
   memset (&hint, 0, sizeof(struct addrinfo));

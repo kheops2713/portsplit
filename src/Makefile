@@ -2,7 +2,7 @@ IDIR = ../include
 CC = gcc
 CPPFLAGS=-D_POSIX_C_SOURCE=200112L
 CFLAGS=-I$(IDIR) \
-	-ansi -O2 -Wchar-subscripts -Wcomment -Wformat=2 -Wimplicit-int \
+	-ansi -pedantic -O2 -Wchar-subscripts -Wcomment -Wformat=2 -Wimplicit-int \
 	-Werror-implicit-function-declaration -Wmain -Wparentheses \
 	-Wsequence-point -Wreturn-type -Wswitch -Wtrigraphs -Wunused \
 	-Wuninitialized -Wunknown-pragmas -Wfloat-equal -Wundef \
@@ -11,7 +11,7 @@ CFLAGS=-I$(IDIR) \
 	-Wmissing-prototypes -Wmissing-declarations -Wmissing-noreturn \
 	-Wformat -Wmissing-format-attribute -Wno-deprecated-declarations \
 	-Wpacked -Wredundant-decls -Wnested-externs -Winline -Wlong-long \
-	-Wunreachable-code
+	-Wunreachable-code -Wno-missing-braces -Wno-missing-field-initializers \
 
 _DEPS = child.h config_parse.h log.h main.h sigs.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
