@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <pty.h>
 
 int treat_client (int clientfd, struct sockaddr const *inbound, int family, config const *_cfg)
 {
