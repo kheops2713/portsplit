@@ -18,24 +18,9 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <time.h>
-
 #define DT_FMT "%F %T"
 
-static char *now (char const* fmt)
-{
-  static char str[64];
-  time_t epochsec = time(NULL);
-  struct tm *proute;
-
-  proute = localtime(&epochsec);
-
-  strftime (str, 64, fmt, proute);
-
-  return str;
-}
-
-
+char *now (char const* fmt);
 void now_r (char const *, char*);
 
 #endif

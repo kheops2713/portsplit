@@ -46,12 +46,12 @@ int main (int argc, char **argv)
 {
   config cfg;
   int ret;
-  
+
   if (argc != 2)
     {
       return -1;
     }
-  
+
   if (parse_config_file (argv[1], &cfg) == -1)
     return -1;
 
@@ -66,7 +66,6 @@ int main_listen_loop (config _cfg)
   struct sockaddr_in *listen_saddr;
   struct sockaddr_in6 *listen_saddr6;
   struct sockaddr inbound;
-  struct stat pidfilestat;
   unsigned int i,j, nbconn;
   int *sockfd, *sockfamily, maxfd, selret, ackfd, s, sig, terminate, child_ret, newconfig, status_info;
   fd_set fdset;
@@ -74,11 +73,11 @@ int main_listen_loop (config _cfg)
   pid_t deadpid, newpid;
   config oldcfg, *cfg;
   char *cfgfile, *pidfile, pidstr[9];
-  
+
   cfg = &_cfg;
 
   sprintf (pidstr, "%d", getpid());
-  
+
   newconfig = 1;
   nbconn = 0;
 
@@ -89,7 +88,7 @@ int main_listen_loop (config _cfg)
       fprintf (stderr, "ERROR: could not setup pipe for signal-catching: %s\n", strerror(errno));
       return -1;
     }
-  
+
   while (newconfig)
     {
        if (cfg->pidfile)
@@ -121,7 +120,7 @@ int main_listen_loop (config _cfg)
       listen_saddr6 = malloc (sizeof(struct sockaddr_in6) * cfg->nbind);
       sockfd = malloc(sizeof (int) * cfg->nbind);
       sockfamily = malloc (sizeof (int) * cfg->nbind);
-      
+
       memset (listen_saddr, 0, sizeof(struct sockaddr_in) * cfg->nbind);
       memset (listen_saddr6, 0, sizeof(struct sockaddr_in6) * cfg->nbind);
 
@@ -143,7 +142,7 @@ int main_listen_loop (config _cfg)
 		maxfd = sockfd[i];
 	    }
 	}
-  
+
       while (!terminate)
 	{
 	  selret = select (maxfd + 1, &fdset, NULL, NULL, &refresh);
@@ -231,12 +230,12 @@ int main_listen_loop (config _cfg)
 			  if (pidfile != NULL && remove(pidfile) == -1)
 			    fprintf (stderr, "ERROR: Could not remove PID file `%s': %s\n", pidfile, strerror(errno));
 			  else
-			    newconfig = 1;	  
+			    newconfig = 1;
 			}
-		      
+
 		      for (i = 0; i < oldcfg.nbind; i++)
 			close (sockfd[i]);
-		      
+
 		      free (cfgfile);
 		      free (listen_saddr);
 		      free (listen_saddr6);
@@ -275,7 +274,7 @@ int main_listen_loop (config _cfg)
   free (sockfd);
   free (sockfamily);
   free_config (cfg);
-  
+
   return 0;
 }
 
@@ -305,7 +304,7 @@ int setup_socket (char const *addr, int port, int *sockfd, int *sockfamily, stru
 	  return -1;
 	}
     }
-      
+
   if ((*sockfd = socket (*sockfamily, SOCK_STREAM, 0)) == -1)
     {
       fprintf (stderr, "ERROR: could not create socket: %s\n", strerror(errno));

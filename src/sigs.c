@@ -22,7 +22,7 @@
 #include "sigs.h"
 #include "main.h"
 
-void set_child_ignored_signals ()
+void set_child_ignored_signals (void)
 {
   struct sigaction action;
 
@@ -40,10 +40,9 @@ void set_child_ignored_signals ()
 }
 
 
-void set_caugth_signals ()
+void set_caugth_signals (void)
 {
   struct sigaction action;
-  sigset_t sigset;
 
   action.sa_handler = &signal_catcher;
   sigemptyset (&action.sa_mask);

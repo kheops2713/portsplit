@@ -18,9 +18,9 @@
 #ifndef SIGS_H
 #define SIGS_H
 
-void set_child_ignored_signals ();
+void set_child_ignored_signals (void);
 void signal_catcher (int);
 
-void set_caugth_signals();
+void set_caugth_signals(void);
 
 #endif
