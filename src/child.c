@@ -32,11 +32,11 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 {
   config *cfg;
   char datetime[64], ip[128];
-  unsigned int ipv, readbuflen, prefill, nbytes, matched_pattern;
+  unsigned int ipv = 0, readbuflen, prefill, nbytes, matched_pattern;
   int maxfd;
   char *prebuffer, *readbuffer, *toflush;
   struct timeval stimeout, *ptimeout;
-  int serverread, serverwrite, selret, r, w, terminate, overflow, established, fwd, couldmatch;
+  int serverread, serverwrite, selret, r, w, terminate, overflow, established, fwd, couldmatch = 0;
   fd_set fdset;
   service const * serv;
 

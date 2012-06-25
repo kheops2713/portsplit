@@ -461,7 +461,7 @@ service const * match_service (config const *cfg, char const *match, unsigned in
 {
   service const *serv, *ret;
   pattern const *pat;
-  unsigned int i, j, matchidx;
+  unsigned int i, j, matchidx = 0;
 
   ret = NULL;
 
@@ -490,7 +490,7 @@ service const * match_service (config const *cfg, char const *match, unsigned in
 
 int could_match (service const *s, char const *str, unsigned int len, unsigned int *pattern_index)
 {
-  unsigned int i, idx, compare_len;
+  unsigned int i, idx = 0, compare_len;
   int couldmatch = 0;
 
   for (i = 0; s->patterns[i] != NULL && couldmatch == 0; i++)
@@ -513,7 +513,7 @@ int could_match_any (config const *cfg, char const *str, unsigned int len, servi
 {
   unsigned int i;
   int found = 0;
-  service const *cur;
+  service const *cur = NULL;
 
   for (i = 0; i < cfg->nservices && !found; i++)
     {
