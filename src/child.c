@@ -36,7 +36,8 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
   int maxfd;
   char *prebuffer, *readbuffer, *toflush;
   struct timeval stimeout, *ptimeout;
-  int serverread, serverwrite, selret, r, w, terminate, overflow, established, fwd, couldmatch = 0;
+  int serverread, serverwrite, selret, terminate, overflow, established, fwd, couldmatch = 0;
+  ssize_t r, w;
   fd_set fdset;
   service const * serv;
 
@@ -437,9 +438,9 @@ int start_proxying (service const *s, int *serverread, int *serverwrite)
   return server_process;
 }
 
-int forward_data (int fd_from, int fd_to, char *buffer, unsigned int len, int *readret, int *writeret) /* assume buffer is malloced to len size */
+int forward_data (int fd_from, int fd_to, char *buffer, unsigned int len, ssize_t *readret, ssize_t *writeret) /* assume buffer is malloced to len size */
 {
-  int r, w;
+  ssize_t r, w;
 
   r = read (fd_from, buffer, len);
   if (readret)
