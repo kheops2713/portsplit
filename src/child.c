@@ -31,16 +31,14 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 {
   config *cfg;
   char datetime[64], ip[128];
-  unsigned int ipv, readbuflen, i, j, prefill, nbytes, matched_pattern;
+  unsigned int ipv, readbuflen, prefill, nbytes, matched_pattern;
   int maxfd;
   char *prebuffer, *readbuffer, *toflush;
   struct timeval stimeout, *ptimeout;
-  pid_t server_process = -1;
   int serverread, serverwrite, selret, r, w, terminate, overflow, established, fwd, couldmatch;
   fd_set fdset;
   service const * serv;
-  service const * servfallback;
-  
+
   set_child_ignored_signals();
 
   cfg = malloc (sizeof(config));
@@ -59,7 +57,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
     readbuflen = 1;
   prebuffer = malloc (cfg->prebuflen);
   readbuffer = malloc (readbuflen);
-  
+
   if (family == AF_INET)
     {
       inet_ntop (family, &(((struct sockaddr_in*)inbound)->sin_addr), ip, 128);
@@ -93,7 +91,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 	      /* NB: There can be a buffer to be flushed (only the prebuffer) */
 	      if (start_proxying (serv, &serverread, &serverwrite) == -1)
 		terminate = 1;
-	      else 
+	      else
 		{
 		  established = 1;
 		  if (prefill)
@@ -136,7 +134,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 	      else
 		{
 		  r = read (clientfd, readbuffer, readbuflen);
-	      
+
 		  if (r > 0) /* let's say it's successful */
 		    {
 		      if (r <= cfg->prebuflen - prefill)
@@ -149,12 +147,12 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 			  nbytes = cfg->prebuflen - prefill;
 			  overflow = 1;
 			}
-		      
+
 		      memcpy (prebuffer + prefill, readbuffer, nbytes);
 		      prefill += nbytes;
 
 		      serv = match_service (cfg, prebuffer, prefill, &matched_pattern);
-		      
+
 		      if ((serv == NULL && prefill < cfg->prebuflen && (couldmatch = could_match_any (cfg, prebuffer, prefill, NULL, NULL)) == 0)
 			  || (serv == NULL && prefill >= cfg->prebuflen))
 			serv = service_by_name (cfg, "fallback");
@@ -180,7 +178,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 				memcpy (toflush + prefill, readbuffer + nbytes, r - nbytes);
 
 			      w = write (serverwrite, toflush, prefill + r - nbytes);
-			      
+
 			      if (w < prefill + r - nbytes)
 				{
 				  now_r (DT_FMT, datetime);
@@ -194,7 +192,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 				  readbuffer = malloc (cfg->readbuflen);
 				  readbuflen = cfg->readbuflen;
 				}
-			      
+
 			      free (toflush);
 			    }
 			}
@@ -239,7 +237,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 	  FD_SET (clientfd, &fdset);
 	  if (serverread > 0)
 	    FD_SET (serverread, &fdset);
-	  
+
 	  maxfd = ((clientfd > serverread) ? clientfd : serverread);
 
 	  if (!established && ptimeout != NULL)
@@ -276,7 +274,7 @@ int connect_one (struct addrinfo const *ai)
   int sockfd = -1, success = 0;
   struct addrinfo const *p;
   char ip[128], datetime[64];
- 
+
   for (p = ai; p != NULL && success == 0; p = p->ai_next)
     {
       if (p->ai_family == AF_INET || p->ai_family == AF_INET6)
@@ -286,9 +284,9 @@ int connect_one (struct addrinfo const *ai)
 	    inet_ntop (p->ai_family, &(((struct sockaddr_in*)p->ai_addr)->sin_addr), ip, 128);
 	  else if (p->ai_family == AF_INET6)
 	    inet_ntop (p->ai_family, &(((struct sockaddr_in6*)p->ai_addr)->sin6_addr), ip, 128);
-	  
+
 	  printf ("%s %d: Trying %s...\n", datetime, getpid(), ip);
-      
+
 	  if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
 	    perror("socket()");
 	  }
@@ -308,17 +306,17 @@ int connect_one (struct addrinfo const *ai)
 	    }
 	}
     }
-  
+
   return ((success == 1) ? sockfd : -1);
 }
 
 int connect_host (char const *hostname, int port)
 {
   int serverfd = -1;
-  char portstr[10], datetime[64];
+  char portstr[10];
 
   printf ("%s %d: Looking up %s...\n", now(DT_FMT), getpid(), hostname);
-  
+
   struct addrinfo *result;
   struct addrinfo hint;
   int retdns;
@@ -334,15 +332,15 @@ int connect_host (char const *hostname, int port)
       printf ("%s %d: DNS resolution failure: %s\n", now(DT_FMT), getpid(), gai_strerror(retdns));
       return -1;
     }
-  
+
   if ((serverfd = connect_one (result)) == -1)
     {
       freeaddrinfo (result);
       return -1;
     }
-  
+
   freeaddrinfo (result);
-  
+
   return serverfd;
 }
 
@@ -426,7 +424,7 @@ int start_proxying (service const *s, int *serverread, int *serverwrite)
 	{
 	  printf ("%s %d: Could not fork: %s\n", datetime, getpid(), strerror(errno));
 	  return -1;
-	}      
+	}
     }
   else
     {

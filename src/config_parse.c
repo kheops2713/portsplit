@@ -79,18 +79,18 @@ int parse_config_file (char const *filename, config *cfg)
 	    {
 	      current_section = malloc (strlen(buf) - 1);
 	      sscanf (buf, "[%[^]]]", current_section);
-	      
+
 	      current_service = malloc (sizeof(service));
 	      init_service_defaults (current_service);
 	      current_service->name = current_section;
-	      
+
 	      tmplist = malloc (sizeof(service*) * (cfg->nservices + 1));
 	      memcpy (tmplist, cfg->services, sizeof(service*) * cfg->nservices);
 	      tmplist[cfg->nservices] = current_service;
 
 	      if (cfg->nservices)
 		free (cfg->services);
-	      
+
 	      cfg->services = tmplist;
 	      cfg->nservices++;
 	    }
@@ -118,7 +118,7 @@ int parse_config_file (char const *filename, config *cfg)
 	    cfg->prebuflen = cfg->services[i]->patterns[j]->len;
 	}
     }
-   
+
 
   return 0;
 }
@@ -144,7 +144,7 @@ int parse_config_line (char const *line, config *cfg)
 	      fprintf (stderr, "Invalid address:port binding specification: `%s'\n", value);
 	      return -1;
 	    }
-	  
+
 	  addr = malloc (sizeof(char*) * (cfg->nbind + 1));
 	  port = malloc (sizeof(unsigned int) * (cfg->nbind + 1));
 	  for (i = 0; i < cfg->nbind; i++)
@@ -176,7 +176,7 @@ int parse_config_line (char const *line, config *cfg)
 	{
 	  cfg->timeout = atoi(value);
 	}
-      else 
+      else
 	{
 	  fprintf (stderr, "Unrecognized parameter `%s'\n", param);
 	}
@@ -186,7 +186,7 @@ int parse_config_line (char const *line, config *cfg)
       fprintf (stderr, "Syntax error: invalid line `%s'\n", line);
       return -1;
     }
-  
+
   return 0;
 }
 
@@ -215,7 +215,7 @@ int parse_service_line (char const *line, service * s)
 	      newpattern->str = matchstr;
 	      newpattern->len = stringlen;
 	      newpattern->type = PATTERN_TYPE_STRING;
-	      
+
 	      for (count = 0; s->patterns[count] != NULL; count++);
 
 	      patterns = malloc (sizeof(pattern*) * (count + 2));
@@ -249,7 +249,7 @@ int parse_service_line (char const *line, service * s)
 	{
 	  s->command = malloc (strlen(value) + 1);
 	  strcpy (s->command, value);
-	  
+
 	  free (s->args);
 
 	  s->args = malloc (sizeof(char*) * 2);
@@ -268,7 +268,7 @@ int parse_service_line (char const *line, service * s)
 	  for (count = 0; s->args[count] != NULL; count++);
 
 	  arraytmp = malloc (sizeof(char*) * (count + 2));
-	  
+
 	  for (count = 0; s->args[count] != NULL; count++)
 	    arraytmp[count] = s->args[count];
 
@@ -369,7 +369,7 @@ char *interpret_string (char const *str, unsigned int *rlen)
 
   free (tmp);
 
-  return result;      
+  return result;
 }
 
 void init_service_defaults (service *s)
@@ -424,7 +424,7 @@ void free_service (service *s)
   unsigned int i;
 
   free (s->name);
-  
+
   for (i = 0; s->patterns[i] != NULL; i++)
     {
       free (s->patterns[i]->str);
@@ -490,7 +490,6 @@ service const * match_service (config const *cfg, char const *match, unsigned in
 
 int could_match (service const *s, char const *str, unsigned int len, unsigned int *pattern_index)
 {
-  pattern const * pat;
   unsigned int i, idx, compare_len;
   int couldmatch = 0;
 
@@ -503,7 +502,7 @@ int could_match (service const *s, char const *str, unsigned int len, unsigned i
 	  idx = i;
 	}
     }
-  
+
   if (pattern_index != NULL)
     *pattern_index = idx;
 
@@ -538,7 +537,7 @@ void copy_service (service *dst, service const *src)
   strcpy (dst->name, src->name);
 
   dst->pty = src->pty;
-  
+
   if (src->command != NULL)
     {
       dst->command = malloc (strlen(src->command) + 1);
@@ -558,7 +557,7 @@ void copy_service (service *dst, service const *src)
   dst->port = src->port;
 
   for (i = 0; src->args[i] != NULL; i++);
- 
+
   dst->args = malloc ((i+1) * sizeof(char*));
   dst->args[i] = NULL;
 
@@ -602,7 +601,7 @@ void copy_config (config *dst, config const *src)
       dst->pidfile = malloc (strlen(src->pidfile) + 1);
       strcpy (dst->pidfile, src->pidfile);
     }
-  else 
+  else
     dst->pidfile = NULL;
 
   dst->port = malloc (dst->nbind * sizeof(unsigned int));

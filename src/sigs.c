@@ -43,7 +43,6 @@ void set_child_ignored_signals (void)
 void set_caugth_signals (void)
 {
   struct sigaction action;
-  sigset_t sigset;
 
   action.sa_handler = &signal_catcher;
   sigemptyset (&action.sa_mask);
