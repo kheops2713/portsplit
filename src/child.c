@@ -32,7 +32,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 {
   config *cfg;
   char datetime[64], ip[128];
-  unsigned int ipv = 0, readbuflen, prefill, nbytes, matched_pattern;
+  unsigned int ipv = 0, readbuflen, prefill, nbytes, rbytes, matched_pattern;
   int maxfd;
   char *prebuffer, *readbuffer, *toflush;
   struct timeval stimeout, *ptimeout;
@@ -99,7 +99,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 		  if (prefill)
 		    {
 		      w = write (serverwrite, prebuffer, prefill);
-		      if (w < prefill)
+		      if ((w >= 0 && (unsigned int)w < prefill) || w < 0)
 			{
 			  now_r (DT_FMT, datetime);
 			  printf ("%s %d: Write error to server while flushing\n", datetime, getpid());
@@ -139,9 +139,10 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 
 		  if (r > 0) /* let's say it's successful */
 		    {
-		      if (r <= cfg->prebuflen - prefill)
+		      rbytes = (unsigned int)r;
+		      if (rbytes <= cfg->prebuflen - prefill)
 			{
-			  nbytes = r;
+			  nbytes = rbytes;
 			  overflow = 0;
 			}
 		      else
@@ -173,15 +174,15 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 			    {
 			      /* Flush pre-buffer + possible overflow */
 			      /* set established to 1 */
-			      toflush = malloc (prefill + r - nbytes);
+			      toflush = malloc (prefill + rbytes - nbytes);
 
 			      memcpy (toflush, prebuffer, prefill);
 			      if (overflow)
-				memcpy (toflush + prefill, readbuffer + nbytes, r - nbytes);
+				memcpy (toflush + prefill, readbuffer + nbytes, rbytes - nbytes);
 
-			      w = write (serverwrite, toflush, prefill + r - nbytes);
+			      w = write (serverwrite, toflush, prefill + rbytes - nbytes);
 
-			      if (w < prefill + r - nbytes)
+			      if ((w >= 0 && (unsigned int)w < prefill + rbytes - nbytes) || w < 0)
 				{
 				  now_r (DT_FMT, datetime);
 				  printf ("%s %d: Error when flushing buffered data to server\n", datetime, getpid());
@@ -312,7 +313,7 @@ int connect_one (struct addrinfo const *ai)
   return ((success == 1) ? sockfd : -1);
 }
 
-int connect_host (char const *hostname, int port)
+int connect_host (char const *hostname, unsigned int port)
 {
   int serverfd = -1;
   char portstr[10];
@@ -326,7 +327,7 @@ int connect_host (char const *hostname, int port)
   memset (&hint, 0, sizeof(struct addrinfo));
   hint.ai_family = AF_UNSPEC;
   hint.ai_socktype = SOCK_STREAM;
-  sprintf (portstr, "%d", port);
+  sprintf (portstr, "%u", port);
 
   if ((retdns = getaddrinfo(hostname, portstr, &hint, &result)) != 0)
     {
@@ -448,7 +449,9 @@ int forward_data (int fd_from, int fd_to, char *buffer, unsigned int len, ssize_
   if (r <= 0)
     return r;
 
-  w = write (fd_to, buffer, r);
+  len = (unsigned int)r;
+
+  w = write (fd_to, buffer, len);
   if (writeret)
     *writeret = w;
 

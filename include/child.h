@@ -25,7 +25,7 @@
 
 int treat_client (int, struct sockaddr const*, int, config const*);
 int connect_one (struct addrinfo const*);
-int connect_host (char const *, int);
+int connect_host (char const *, unsigned int);
 int start_proxying (service const *, int *, int *);
 int forward_data (int, int, char *, unsigned int, ssize_t*, ssize_t*);
 
