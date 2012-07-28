@@ -170,11 +170,13 @@ int parse_config_line (char const *line, config *cfg)
 	}
       else if (strcmp(param, "maxconn") == 0)
 	{
-	  cfg->maxconn = atoi(value);
+	  /* cfg->maxconn = atoi(value); */
+	  sscanf (value, "%u", &cfg->maxconn);
 	}
       else if (strcmp(param, "timeout") == 0)
 	{
-	  cfg->timeout = atoi(value);
+	  /* cfg->timeout = atoi(value); */
+	  sscanf (value, "%u", &cfg->timeout);
 	}
       else
 	{
@@ -320,7 +322,9 @@ int split_host_port (char const *str, char **host, unsigned int *port)
 
   *host = malloc (strlen (str) + 1);
   strcpy (*host, str);
-  *port = atoi (colon + 1);
+
+  /* *port = atoi (colon + 1);*/
+  sscanf (colon + 1, "%u", port);
 
   return 0;
 }
