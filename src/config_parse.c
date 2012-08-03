@@ -170,13 +170,11 @@ int parse_config_line (char const *line, config *cfg)
 	}
       else if (strcmp(param, "maxconn") == 0)
 	{
-	  /* cfg->maxconn = atoi(value); */
 	  sscanf (value, "%u", &cfg->maxconn);
 	}
       else if (strcmp(param, "timeout") == 0)
 	{
-	  /* cfg->timeout = atoi(value); */
-	  sscanf (value, "%u", &cfg->timeout);
+	  sscanf (value, "%ld", &cfg->timeout);
 	}
       else
 	{

@@ -18,6 +18,8 @@
 #ifndef CONFIG_PARSE_H
 #define CONFIG_PARSE_H
 
+#include <sys/time.h>
+
 typedef struct pattern_t
 {
   char *str;
@@ -44,7 +46,7 @@ typedef struct config_t
   unsigned int *port;
   unsigned int nbind;
   unsigned int maxconn;
-  unsigned int timeout;
+  time_t timeout;
   service **services;
   unsigned int nservices;
   unsigned int prebuflen;

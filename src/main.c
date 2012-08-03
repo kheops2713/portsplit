@@ -68,6 +68,8 @@ int main_listen_loop (config _cfg)
   struct sockaddr inbound;
   unsigned int i,j, nbconn;
   int *sockfd, *sockfamily, maxfd, selret, ackfd, s, sig, terminate, child_ret, newconfig, status_info;
+  ssize_t wret;
+  socklen_t sl;
   fd_set fdset;
   struct timeval refresh;
   pid_t deadpid, newpid;
@@ -98,9 +100,10 @@ int main_listen_loop (config _cfg)
 	       fprintf (stderr, "ERROR: could not open file `%s': %s\n", cfg->pidfile, strerror(errno));
 	       return -1;
 	     }
-	   else if (write (s, pidstr, strlen(pidstr)) < strlen(pidstr))
+	   wret = write (s, pidstr, strlen(pidstr));
+	   if (wret < 0 || (unsigned int)wret < strlen(pidstr))
 	     {
-	       fprintf (stderr, "ERROR: could not write PID to file `%s'\n", cfg->pidfile);
+	       fprintf (stderr, "ERROR: could not write PID to file `%s'%s%s\n", cfg->pidfile, (wret < 0 ? ":" : ""), (wret < 0 ? strerror(errno) : ""));
 	       close (s);
 	       return -1;
 	     }
@@ -165,10 +168,10 @@ int main_listen_loop (config _cfg)
 		  if (FD_ISSET (sockfd[i], &fdset))
 		    {
 		      if (sockfamily[i] == AF_INET)
-			s = sizeof (struct sockaddr_in);
+			sl = sizeof (struct sockaddr_in);
 		      else if (sockfamily[i] == AF_INET6)
-			s = sizeof (struct sockaddr_in6);
-		      ackfd = accept (sockfd[i], &inbound, &s);
+			sl = sizeof (struct sockaddr_in6);
+		      ackfd = accept (sockfd[i], &inbound, &sl);
 		      if (ackfd != -1)
 			{
 			  if (nbconn < cfg->maxconn || cfg->maxconn == 0)
@@ -278,7 +281,7 @@ int main_listen_loop (config _cfg)
   return 0;
 }
 
-int setup_socket (char const *addr, int port, int *sockfd, int *sockfamily, struct sockaddr_in *listen_saddr, struct sockaddr_in6 *listen_saddr6)
+int setup_socket (char const *addr, unsigned int port, int *sockfd, int *sockfamily, struct sockaddr_in *listen_saddr, struct sockaddr_in6 *listen_saddr6)
 {
   int s;
 

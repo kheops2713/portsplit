@@ -28,7 +28,7 @@
 
 int main_listen_loop (config);
 
-int setup_socket (char const*, int, int*, int*, struct sockaddr_in*, struct sockaddr_in6*);
+int setup_socket (char const*, unsigned int, int*, int*, struct sockaddr_in*, struct sockaddr_in6*);
 
 
 int sigfd[2];

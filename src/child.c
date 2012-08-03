@@ -46,7 +46,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
   cfg = malloc (sizeof(config));
   copy_config (cfg, _cfg);
 
-  stimeout.tv_sec = cfg->timeout;
+  stimeout.tv_sec = cfg->timeout; /* type of this field is time_t */
   stimeout.tv_usec = 0;
 
   if (cfg->timeout)

@@ -26,13 +26,13 @@ void set_child_ignored_signals (void)
 {
   struct sigaction action;
 
-  action.sa_handler = SIG_IGN;
+  action.sa_handler =  (void(*) (int))SIG_IGN;
+  action.sa_sigaction = (void(*) (int, siginfo_t*, void*)) SIG_IGN;
   sigemptyset (&action.sa_mask);
   sigaddset (&action.sa_mask, SIGHUP);
   sigaddset (&action.sa_mask, SIGUSR1);
   sigaddset (&action.sa_mask, SIGUSR2);
   action.sa_flags = 0;
-  action.sa_sigaction = SIG_IGN;
 
   sigaction (SIGHUP, &action, NULL);
   sigaction (SIGUSR1, &action, NULL);
