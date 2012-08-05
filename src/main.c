@@ -94,23 +94,25 @@ int main_listen_loop (config _cfg)
 
   while (newconfig)
     {
-       if (cfg->pidfile)
-	 {
-	   if ((s = open (cfg->pidfile, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR)) < 0)
-	     {
-	       fprintf (stderr, "ERROR: could not open file `%s': %s\n", cfg->pidfile, strerror(errno));
-	       return -1;
-	     }
-	   wret = write (s, pidstr, strlen(pidstr));
-	   if (wret < 0 || (unsigned int)wret < strlen(pidstr))
-	     {
-	       fprintf (stderr, "ERROR: could not write PID to file `%s'%s%s\n", cfg->pidfile, (wret < 0 ? ":" : ""), (wret < 0 ? strerror(errno) : ""));
-	       close (s);
-	       return -1;
-	     }
-
-	   close (s);
-	 }
+      if (cfg->pidfile)
+	{
+	  if ((s = open (cfg->pidfile, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR)) < 0)
+	    {
+	      fprintf (stderr, "ERROR: could not open file `%s': %s\n", cfg->pidfile, strerror(errno));
+	      return -1;
+	    }
+	  wret = write (s, pidstr, strlen(pidstr));
+	  if (wret < 0 || (unsigned int)wret < strlen(pidstr))
+	    {
+	      fprintf (stderr, "ERROR: could not write PID to file `%s'%s%s\n", cfg->pidfile, (wret < 0 ? ":" : ""), (wret < 0 ? strerror(errno) : ""));
+	      close (s);
+	      return -1;
+	    }
+	  
+	  close (s);
+	}
+      
+      printf ("%s -> Loaded configuration: %d services defined, %d local addresses to bind\n", now(), cfg->nservices, cfg->nbind);
 
       newconfig = 0;
       maxfd = 0;
