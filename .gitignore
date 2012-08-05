@@ -1,2 +1,5 @@
 src/portsplit
 src/*.o
+src/*~
+include/*~
+*~
