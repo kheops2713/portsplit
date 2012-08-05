@@ -20,7 +20,7 @@
 
 #define DT_FMT "%F %T"
 
-char *now (char const* fmt);
-void now_r (char const *, char*);
+char *now (void);
+void now_r (char*);
 
 #endif

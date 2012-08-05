@@ -18,7 +18,7 @@
 #include <time.h>
 #include "log.h"
 
-char *now (char const* fmt)
+char *now ()
 {
   static char str[64];
   time_t epochsec = time(NULL);
@@ -26,17 +26,17 @@ char *now (char const* fmt)
 
   proute = localtime(&epochsec);
 
-  strftime (str, 64, fmt, proute);
+  strftime (str, 64, DT_FMT, proute);
 
   return str;
 }
 
-void now_r (char const *fmt, char *str)
+void now_r (char *str)
 {
   time_t epochsec = time(NULL);
   struct tm *proute;
 
   proute = localtime(&epochsec);
 
-  strftime (str, 64, fmt, proute);
+  strftime (str, 64, DT_FMT, proute);
 }
