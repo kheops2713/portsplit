@@ -1,6 +1,6 @@
 IDIR = ../include
 CC = gcc
-CPPFLAGS=-D_POSIX_C_SOURCE=200112L
+PPFLAGS=-D_POSIX_C_SOURCE=199309L
 CFLAGS=-I$(IDIR) \
 	-ansi -pedantic -O2 -Wchar-subscripts -Wcomment -Wformat=2 -Wimplicit-int \
 	-Werror-implicit-function-declaration -Wmain -Wparentheses \
@@ -23,7 +23,7 @@ LIBS = -lutil
 TARGET = portsplit
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(PPFLAGS)
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(LIBS)
