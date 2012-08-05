@@ -18,7 +18,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#define DT_FMT "%F %T"
+#define DT_FORMAT "%Y-%m-%d %H:%M:%S"
 
 char *now (void);
 void now_r (char*);

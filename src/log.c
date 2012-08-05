@@ -26,7 +26,7 @@ char *now ()
 
   proute = localtime(&epochsec);
 
-  strftime (str, 64, DT_FMT, proute);
+  strftime (str, 64, DT_FORMAT, proute);
 
   return str;
 }
@@ -38,5 +38,5 @@ void now_r (char *str)
 
   proute = localtime(&epochsec);
 
-  strftime (str, 64, DT_FMT, proute);
+  strftime (str, 64, DT_FORMAT, proute);
 }
