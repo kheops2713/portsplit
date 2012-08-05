@@ -71,7 +71,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
       ipv = 6;
     }
 
-  now_r (DT_FMT, datetime);
+  now_r (datetime);
   printf ("%s %d: New connection from IPv%d %s\n", datetime, getpid(), ipv, ip);
 
   FD_ZERO (&fdset);
@@ -101,7 +101,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 		      w = write (serverwrite, prebuffer, prefill);
 		      if ((w >= 0 && (unsigned int)w < prefill) || w < 0)
 			{
-			  now_r (DT_FMT, datetime);
+			  now_r (datetime);
 			  printf ("%s %d: Write error to server while flushing\n", datetime, getpid());
 			  terminate = 1;
 			  established = 0;
@@ -114,7 +114,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 	    }
 	  else
 	    {
-	      now_r (DT_FMT, datetime);
+	      now_r (datetime);
 	      printf ("%s %d: No timeout service defined, giving up.\n", datetime, getpid());
 	      terminate = 1;
 	    }
@@ -127,7 +127,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 		{
 		  if ((fwd = forward_data (clientfd, serverwrite, readbuffer, readbuflen, &r, &w)) <= 0)
 		    terminate = 1;
-		  now_r (DT_FMT, datetime);
+		  now_r (datetime);
 		  if (fwd == 0)
 		    printf ("%s %d: EOF from %s\n", datetime, getpid(), (r == 0 ? "client" : "server"));
 		  else if (fwd < 0)
@@ -162,7 +162,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 
 		      if (serv != NULL)
 			{
-			  now_r (DT_FMT, datetime);
+			  now_r (datetime);
 			  if (strcmp (serv->name, "fallback"))
 			    printf ("%s %d: Engaging service `%s' (matched pattern %d).\n", datetime, getpid(), serv->name, matched_pattern);
 			  else
@@ -184,7 +184,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 
 			      if ((w >= 0 && (unsigned int)w < prefill + rbytes - nbytes) || w < 0)
 				{
-				  now_r (DT_FMT, datetime);
+				  now_r (datetime);
 				  printf ("%s %d: Error when flushing buffered data to server\n", datetime, getpid());
 				  terminate = 1;
 				}
@@ -201,20 +201,20 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 			}
 		      else if (prefill >= cfg->prebuflen || couldmatch == 0) /* also serv is NULL so there is no fallback */
 			{
-			  now_r (DT_FMT, datetime);
+			  now_r (datetime);
 			  printf ("%s %d: Don't know what to do, throwing out client.\n", datetime, getpid());
 			  terminate = 1;
 			}
 		    }
 		  else if (r == 0)
 		    {
-		      now_r (DT_FMT, datetime);
+		      now_r (datetime);
 		      printf ("%s %d: End of file from client.\n", datetime, getpid());
 		      terminate = 1;
 		    }
 		  else if (r < 0)
 		    {
-		      now_r (DT_FMT, datetime);
+		      now_r (datetime);
 		      printf ("%s %d: Read error from client: %s\n", datetime, getpid(), strerror(errno));
 		      terminate = 1;
 		    }
@@ -226,7 +226,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 	      if ((fwd = forward_data (serverread, clientfd, readbuffer, readbuflen, &r, &w)) <= 0)
 		terminate = 1;
 
-	      now_r (DT_FMT, datetime);
+	      now_r (datetime);
 	      if (fwd == 0)
 		printf ("%s %d: EOF from %s\n", datetime, getpid(), (r == 0 ? "server" : "client"));
 	      else if (fwd < 0)
@@ -255,7 +255,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 	}
     }
 
-  now_r (DT_FMT, datetime);
+  now_r (datetime);
   printf ("%s %d: Terminating connection with %s.\n", datetime, getpid(), ip);
 
   close (clientfd);
@@ -282,7 +282,7 @@ int connect_one (struct addrinfo const *ai)
     {
       if (p->ai_family == AF_INET || p->ai_family == AF_INET6)
 	{
-	  now_r (DT_FMT, datetime);
+	  now_r (datetime);
 	  if (p->ai_family == AF_INET)
 	    inet_ntop (p->ai_family, &(((struct sockaddr_in*)p->ai_addr)->sin_addr), ip, 128);
 	  else if (p->ai_family == AF_INET6)
@@ -302,7 +302,7 @@ int connect_one (struct addrinfo const *ai)
 		}
 	      else
 		{
-		  now_r (DT_FMT, datetime);
+		  now_r (datetime);
 		  success = 1;
 		  printf ("%s %d: Connected.\n", datetime, getpid());
 		}
@@ -316,12 +316,13 @@ int connect_one (struct addrinfo const *ai)
 int connect_host (char const *hostname, unsigned int port)
 {
   int serverfd = -1;
-  char portstr[10];
+  char portstr[10], datetime[64];
   struct addrinfo *result;
   struct addrinfo hint;
   int retdns;
 
-  printf ("%s %d: Looking up %s...\n", now(DT_FMT), getpid(), hostname);
+  now_r(datetime);
+  printf ("%s %d: Looking up %s...\n", datetime, getpid(), hostname);
 
   memset (portstr, 0, 10 * sizeof(char));
   memset (&hint, 0, sizeof(struct addrinfo));
@@ -331,7 +332,8 @@ int connect_host (char const *hostname, unsigned int port)
 
   if ((retdns = getaddrinfo(hostname, portstr, &hint, &result)) != 0)
     {
-      printf ("%s %d: DNS resolution failure: %s\n", now(DT_FMT), getpid(), gai_strerror(retdns));
+      now_r (datetime);
+      printf ("%s %d: DNS resolution failure: %s\n", datetime, getpid(), gai_strerror(retdns));
       return -1;
     }
 
@@ -354,7 +356,7 @@ int start_proxying (service const *s, int *serverread, int *serverwrite)
 
   if (s->host != NULL) /* proxy to another server */
     {
-      now_r (DT_FMT, datetime);
+      now_r (datetime);
       printf ("%s %d: Service `%s': connecting to %s:%d\n", datetime, getpid(), s->name, s->host, s->port);
       if ((serverfd = connect_host (s->host, s->port)) == -1)
 	return -1;
@@ -363,7 +365,7 @@ int start_proxying (service const *s, int *serverread, int *serverwrite)
     }
   else if (s->command != NULL)
     {
-      now_r (DT_FMT, datetime);
+      now_r (datetime);
       printf ("%s %d: Service `%s': piping\n", datetime, getpid(), s->name);
 
       if (s->pty)
@@ -430,7 +432,7 @@ int start_proxying (service const *s, int *serverread, int *serverwrite)
     }
   else
     {
-      now_r (DT_FMT, datetime);
+      now_r (datetime);
       printf ("%s %d: No action configured for service `%s'\n", datetime, getpid(), s->name);
       return -1;
     }

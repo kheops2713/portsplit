@@ -157,7 +157,7 @@ int main_listen_loop (config _cfg)
 	  while ((deadpid = waitpid (-1, &status_info, WNOHANG)) > 0)
 	    {
 	      nbconn--;
-	      printf ("%s -> Process %d terminated (exit code %d), connection number is now %d/%d\n", now(DT_FMT), deadpid, WEXITSTATUS(status_info), nbconn, cfg->maxconn);
+	      printf ("%s -> Process %d terminated (exit code %d), connection number is now %d/%d\n", now(), deadpid, WEXITSTATUS(status_info), nbconn, cfg->maxconn);
 	    }
 
 	  if (selret >= 0)
@@ -189,13 +189,13 @@ int main_listen_loop (config _cfg)
 			      else if (newpid > 0)
 				{
 				  nbconn++;
-				  printf ("%s -> Spawning child process for connection %d%s%d\n", now(DT_FMT), nbconn, cfg->maxconn ? "/" : "", cfg->maxconn);
+				  printf ("%s -> Spawning child process for connection %d%s%d\n", now(), nbconn, cfg->maxconn ? "/" : "", cfg->maxconn);
 				  close(ackfd); /* No worries, it's been duplicated to the child process */
 				}
 			    }
 			  else
 			    {
-			      printf ("%s -> Dropping incoming connection (no more slots available)\n", now(DT_FMT));
+			      printf ("%s -> Dropping incoming connection (no more slots available)\n", now());
 			      close (ackfd);
 			    }
 			}
@@ -208,12 +208,12 @@ int main_listen_loop (config _cfg)
 		  read (sigfd[0], &sig, sizeof(sig));
 		  if (sig == SIGTERM || sig == SIGINT)
 		    {
-		      printf ("%s -> Got signal %d, exiting\n", now(DT_FMT), sig);
+		      printf ("%s -> Got signal %d, exiting\n", now(), sig);
 		      terminate = 1;
 		    }
 		  else if (sig == SIGHUP)
 		    {
-		      printf ("%s -> Got SIGHUP, reloading configuration\n", now(DT_FMT));
+		      printf ("%s -> Got SIGHUP, reloading configuration\n", now());
 		      terminate = 1;
 
 		      cfgfile = malloc (strlen(cfg->filename) + 1);
