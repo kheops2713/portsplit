@@ -9,7 +9,7 @@ CFLAGS=-I$(IDIR) \
 	-Wshadow -Wpointer-arith -Wbad-function-cast -Wwrite-strings \
 	-Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes \
 	-Wmissing-prototypes -Wmissing-declarations -Wmissing-noreturn \
-	-Wformat -Wmissing-format-attribute -Wno-deprecated-declarations \
+	-Wformat -Wmissing-format-attribute \
 	-Wpacked -Wredundant-decls -Wnested-externs -Winline -Wlong-long \
 	-Wunreachable-code -Wno-missing-braces -Wno-missing-field-initializers \
 
