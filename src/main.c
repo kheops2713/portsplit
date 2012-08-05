@@ -243,6 +243,7 @@ int main_listen_loop (config _cfg)
 			close (sockfd[i]);
 
 		      free (cfgfile);
+		      free (pidfile);
 		      free (listen_saddr);
 		      free (listen_saddr6);
 		      free (sockfd);
