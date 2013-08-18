@@ -88,7 +88,7 @@ int main_listen_loop (config _cfg)
 
   if (pipe(sigfd) == -1)
     {
-      fprintf (stderr, "ERROR: could not setup pipe for signal-catching: %s\n", strerror(errno));
+      fprintf (stderr, "ERROR: could not setup pipe for signal catching: %s\n", strerror(errno));
       return -1;
     }
 
