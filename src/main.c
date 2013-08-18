@@ -1,5 +1,5 @@
 /*
- * ps2.c - this file is part of Portsplit.
+ * main.c - this file is part of Portsplit.
  *
  * Portsplit is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
