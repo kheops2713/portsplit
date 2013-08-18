@@ -333,7 +333,7 @@ int setup_socket (char const *addr, unsigned int port, int *sockfd, int *sockfam
     }
   else if (*sockfamily == PF_INET6)
     {
-      if (bind (*sockfd, (struct sockaddr*) listen_saddr6, sizeof (struct sockaddr_in6)) == -1)
+      if (bind (*sockfd, (struct sockaddr*)listen_saddr6, sizeof (struct sockaddr_in6)) == -1)
 	{
 	  fprintf (stderr, "ERROR: could not bind socket to %s:%d: %s.\n", addr, port, strerror(errno));
 	  return -1;
