@@ -1,4 +1,5 @@
 - Daemonization
+- Proper logging
 - Manage UDP
 - External files with patterns
 - Pattern regex
