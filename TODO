@@ -1,5 +1,5 @@
 - Daemonization
-- Proper logging
+- Proper logging, both to logfile (first priority) and syslog (second priority)
 - Define meaningful internal return codes for better error handling
 - Manage UDP
 - External files with patterns to be matched
