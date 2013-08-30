@@ -1,10 +1,16 @@
+# Roadmap to version 1.0.0
+- Make sure output messages are relevant, give enough info, etc.
+- Have the sourcecode be selfaware of the hash of the git-commit at compile time
+- Write a manpage (at least a stub)
+- Use autotools etc. to have a proper Makefile
+- Tag version 1.0.0 with git when it's ok.
+- Write proper README and INSTALL
+
+# Going further
 - Daemonization
 - Proper logging, both to logfile (first priority) and syslog (second priority)
 - Define meaningful internal return codes for better error handling
 - Manage UDP
 - External files with patterns to be matched
 - Pattern regex
-- Write manpages
-- Hunt bugs
-- Use libevent instead of select()
-- Write a proper README :)
+- Use libevent instead of select() ? (not sure)
