@@ -149,6 +149,9 @@ int main_listen_loop (config _cfg)
 	    }
 	}
 
+      if (!terminate)
+        printf ("All local listening addresses seem to have been successfully bound \\o/\n");
+
       while (!terminate)
 	{
 	  selret = select (maxfd + 1, &fdset, NULL, NULL, &refresh);
@@ -288,6 +291,8 @@ int main_listen_loop (config _cfg)
 int setup_socket (char const *addr, unsigned int port, int *sockfd, int *sockfamily, struct sockaddr_in *listen_saddr, struct sockaddr_in6 *listen_saddr6)
 {
   int s;
+
+  printf ("Setting up socket to listen on address %s, port %u.\n", addr, port);
 
   if (index (addr, ':') != NULL)
     {
