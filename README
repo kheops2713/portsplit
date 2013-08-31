@@ -1,11 +1,60 @@
-Simple TCP port multiplexer (or "port splitter").
+This is Portsplit.
 
-Just run "make" to compile. Binary will be in
-"src" directory.
 
-See example config file in examples directory.
+Introduction
+----------------------------------------------------------------------
+Portsplit is a simple TCP port multiplexer: it makes it possible to
+run several services behind a unique TCP port. It is very comparable
+to sslh since it relies on the first bytes sent by a connecting client
+in order to decide what to do.
 
-All comments/feedbacks are welcome.
+Unlike sslh, it does not understand a fixed and hardcoded number of
+protocols: no protocol is hardcoded, but the user can define as many
+protocols as they wants thanks to a configuration file. Additionally,
+Portsplit can not only do port forwarding but can also fork a local
+process and pipe the stdin/stdout from/to the socket. Portsplit can
+also bind at once as many local addresses and ports as wanted.
 
-~~~~~~~:)
-KheOps <kheops@ceops.eu>
+For that, it should be more flexible than sslh.
+
+For the story, its development was motivated by the need to reduce
+fingerprintability of VPN traffic from Syria.
+
+All comments and feedbacks are welcome:
+KheOps <kheops [at] ceops [dot] eu>
+
+
+Usage and configuration
+----------------------------------------------------------------------
+Just pass the path to the config file as argument to Portsplit:
+$ portsplit <config-file>
+
+A configuration example is provided in the examples/ directory and
+shows usage examples of all existing options at the moment.
+
+An unlimited number of services can be defined, and each service
+definition starts with its name between brackets, e.g. "[myservice]"
+alone on a line.
+
+There are two special services:
+- "fallback" is chosen when the client sent something that did not
+  match any of the other services and has no chance to match any of
+  them with more bytes.
+- "timeout" is chosen when the client connected but did not send any
+  data after some amount of time (configurable).
+
+
+Limitations
+----------------------------------------------------------------------
+Portsplit relies on the first bytes sent by a connecting client in
+order to decide which service it should forward the connection to.
+
+This means that Portsplit will not be able to take any decision
+between two protocols in which where the server is supposed to talk
+first. A timeout parameter can be set in order to take action when a
+client did not talk at all for some time after its connection.
+
+
+Propaganda
+----------------------------------------------------------------------
+Make datalove, not cyberwar ~~~~~~~:)
