@@ -26,7 +26,7 @@ KheOps <kheops [at] ceops [dot] eu>
 
 Usage and configuration
 ----------------------------------------------------------------------
-Just pass the path to the config file as argument to Portsplit:
+Just pass the path of the config file as argument to Portsplit:
 $ portsplit <config-file>
 
 A configuration example is provided in the examples/ directory and
