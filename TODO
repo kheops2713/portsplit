@@ -13,4 +13,4 @@
 - Manage UDP
 - External files with patterns to be matched
 - Pattern regex
-- Use libevent instead of select() ? (not sure)
+- Add support for management of libevent, and keep the old select() and give the choice at compile-time
