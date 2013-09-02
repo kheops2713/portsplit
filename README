@@ -50,9 +50,9 @@ Portsplit relies on the first bytes sent by a connecting client in
 order to decide which service it should forward the connection to.
 
 This means that Portsplit will not be able to take any decision
-between two protocols in which where the server is supposed to talk
-first. A timeout parameter can be set in order to take action when a
-client did not talk at all for some time after its connection.
+between two protocols in which the server is supposed to talk first. A
+timeout parameter can be set in order to take action when a client did
+not talk at all for some time after its connection.
 
 
 Propaganda
