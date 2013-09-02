@@ -18,7 +18,7 @@ also bind at once as many local addresses and ports as wanted.
 For that, it should be more flexible than sslh.
 
 For the story, its development was motivated by the need to reduce
-fingerprintability of VPN traffic from Syria.
+detectionability of VPN traffic from Syria.
 
 All comments and feedbacks are welcome:
 KheOps <kheops [at] ceops [dot] eu>
