@@ -7,9 +7,12 @@ define(VERSION_ID,esyscmd([
 
 AC_PREREQ([2.69])
 AC_INIT([Portsplit], VERSION_ID, [kheops@ceops.eu], [portsplit], [https://github.com/kheops2713/portsplit])
+AM_INIT_AUTOMAKE([-Wall])
 AC_CONFIG_SRCDIR([include/main.h src/main.c])
 AC_CONFIG_HEADERS([include/config.h])
 AC_CANONICAL_HOST
+
+AM_CFLAGS([-ansi -pedantic -O2 -Wchar-subscripts -Wcomment -Wformat=2 -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wparentheses -Wsequence-point -Wreturn-type -Wswitch -Wtrigraphs -Wunused -Wuninitialized -Wunknown-pragmas -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wmissing-noreturn -Wformat -Wmissing-format-attribute -Wpacked -Wredundant-decls -Wnested-externs -Winline -Wlong-long -Wunreachable-code -Wno-missing-braces -Wno-missing-field-initializers -D_POSIX_C_SOURCE=199309L])
 
 # Checks for programs.
 AC_PROG_CC
