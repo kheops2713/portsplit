@@ -8,7 +8,7 @@ define(VERSION_ID,esyscmd([
 AC_PREREQ([2.69])
 AC_INIT([Portsplit], VERSION_ID, [kheops@ceops.eu], [portsplit], [https://github.com/kheops2713/portsplit])
 AM_INIT_AUTOMAKE([-Wall])
-AC_CONFIG_SRCDIR([include/main.h src/main.c])
+AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([include/config.h])
 AC_CANONICAL_HOST
 
