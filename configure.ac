@@ -19,23 +19,23 @@ AC_PROG_CC
 AC_CHECK_LIB([util], [openpty])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h
-                  fcntl.h
-                  netdb.h
-                  stdio.h
-                  stdlib.h
-                  string.h
-                  strings.h
-                  sys/socket.h
-                  sys/select.h
-                  time.h
-                  sys/types.h
-                  sys/wait.h
-                  sys/stat.h
-                  unistd.h
-                  pty.h
-                  endian.h
-                  errno.h
+AC_CHECK_HEADERS([arpa/inet.h \
+                  fcntl.h \
+                  netdb.h \
+                  stdio.h \
+                  stdlib.h \
+                  string.h \
+                  strings.h \
+                  sys/socket.h \
+                  sys/select.h \
+                  time.h \
+                  sys/types.h \
+                  sys/wait.h \
+                  sys/stat.h \
+                  unistd.h \
+                  pty.h \
+                  endian.h \
+                  errno.h \
                   signal.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -47,6 +47,5 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([dup2 memset select socket strerror])
 
-AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
