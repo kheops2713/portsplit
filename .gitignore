@@ -1,5 +1,3 @@
-Makefile
-./configure
 src/portsplit
 src/*.o
 src/*~
