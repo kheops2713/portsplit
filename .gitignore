@@ -1,5 +1,4 @@
 Makefile
-config.*
 ./configure
 src/portsplit
 src/*.o
