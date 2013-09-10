@@ -48,5 +48,5 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([dup2 memset select socket strerror])
 
-AC_CONFIG_FILES([Makefile src/Makefile include/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile include/Makefile examples/Makefile])
 AC_OUTPUT
