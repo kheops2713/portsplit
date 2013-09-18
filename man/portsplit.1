@@ -15,9 +15,8 @@ to this port can reach a HTTP server, an IRC server or a PPP daemon,
 depending on what they request upon connection.
 .PP
 The principle of \f[B]portsplit\f[] is simply to listen on a (set of)
-local port(s), wait for clients to connect and decide what to do with
-each incoming connection based on the first bytes sent by the connecting
-client.
+local port(s) and decide what to do with each incoming connection based
+on the first bytes sent by the connecting client.
 .PP
 No protocol or service is hardcoded in \f[B]portsplit\f[]: its
 configuration file must contain \f[B]patterns\f[], i.e.
