@@ -1,0 +1,70 @@
+.TH PORTSPLIT 1 "2013-09-18" TCP\ port\ multiplexer
+.SH NAME
+.PP
+portsplit \- a TCP port multiplexer
+.SH SYNOPSIS
+.PP
+\f[B]portsplit\f[] <filename>
+.SH DESCRIPTION
+.PP
+The \f[B]portsplit\f[] program is designed to "multiplex" a TCP port,
+that is, to allow to have several distinct services reachable behind a
+single TCP port.
+For instance, one can open a single TCP port so that clients connecting
+to this port can reach a HTTP server, an IRC server or a PPP daemon,
+depending on what they request upon connection.
+.PP
+The principle of \f[B]portsplit\f[] is simply to listen on a (set of)
+local port(s), wait for clients to connect and decide what to do with
+each incoming connection based on the first bytes sent by the connecting
+client.
+.PP
+No protocol or service is hardcoded in \f[B]portsplit\f[]: its
+configuration file must contain \f[B]patterns\f[], i.e.
+sequences of bytes with which what the client sends will be compared.
+If a pattern is matched by what a client sent, a corresponding action is
+taken.
+An action is taken as well if the client does not send any byte for some
+period of time or if the bytes sent have no chance to match anything
+defined in the configuration.
+.PP
+Actions must also be configured, and three of them are possible:
+transparently forward the connection to a remote server; execute a local
+process and forward its standard input/output from/to the client; close
+the connection.
+Closing the connection is not explicitly configurable and is the default
+behavior if no pattern is matched and no fallback action has been
+configured.
+.PP
+A set of patterns and a single action together define a \f[B]service\f[]
+in the \f[B]portsplit\f[] configuration.
+An "http" service could for instance have the string patterns "GET" and
+"POST" and have the action of connecting to IP address ::1 on port 80,
+i.e.
+a locally running web server.
+.PP
+\f[B]Portsplit\f[] fully supports both IPv4 and IPv6.
+.SH OPTIONS
+.PP
+\f[B]Portsplit\f[] takes only one option, which is the path to its
+configuration file.
+.SH CONFIGURATION FILE
+.PP
+Fix me!
+.SS GLOBAL OPTIONS
+.PP
+Fix me!
+.SS SERVICES
+.PP
+Fix me!
+.SH SIGNALS
+.PP
+Fix me!
+.SH LIMITATIONS
+.PP
+Fix me!
+.SH BUGS
+.PP
+Fix me!
+.SH AUTHORS
+KheOps <kheops@ceops.eu>.
