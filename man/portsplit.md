@@ -57,6 +57,12 @@ On the other hand, binding only the loopback interface, both in IPv4 and IPv6, i
     bind = 127.0.0.1:9090
     bind = ::1:9090
 
+**timeout** = \<_seconds_\>
+
+**maxconn** = \<_number_\>
+
+**pid** = \<_filename_\>
+
 ## SERVICE-LEVEL OPTIONS
 
 Fix me!
