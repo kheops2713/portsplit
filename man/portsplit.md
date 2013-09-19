@@ -47,7 +47,7 @@ There are two special service names which have a particular meaning:
 
 Specify a local address and port to bind. _IP_ can be either an IPv4 or IPv6 in their standard or shortened notation (for IPv6). This option can be specified several times. Both the IP and port specifications are mandatory. The usual wildcards apply in order to listen on all interfaces: '0.0.0.0' for IPv4 and '::' for IPv6.
 
-Listening on all interfaces on both IPv4 and IPv6 on port 9090 would is thus done like this:
+Listening on all interfaces on both IPv4 and IPv6 on port 9090 is thus done like this:
 
     bind = 0.0.0.0:9090
     bind = :::9090
