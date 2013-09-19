@@ -44,7 +44,7 @@ There are two special service names which have a particular meaning:
 
 Fix me!
 
-## SERVICES
+## SERVICE-LEVEL OPTIONS
 
 Fix me!
 
