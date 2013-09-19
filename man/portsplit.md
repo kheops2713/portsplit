@@ -22,8 +22,9 @@ A set of patterns and a single action together define a **service** in the **por
 
 # OPTIONS
 
-| \<**filename**\>
-|       Path to the configuration file.
+\<**filename**\>
+
+Path to the configuration file.
 
 # CONFIGURATION FILE
 
@@ -42,7 +43,19 @@ There are two special service names which have a particular meaning:
 
 ## GLOBAL OPTIONS
 
-Fix me!
+**bind** = \<_IP_\>:\<_port_\>
+
+Specify a local address and port to bind. _IP_ can be either an IPv4 or IPv6 in their standard or shortened notation (for IPv6). This option can be specified several times. Both the IP and port specifications are mandatory. The usual wildcards apply in order to listen on all interfaces: '0.0.0.0' for IPv4 and '::' for IPv6.
+
+Listening on all interfaces on both IPv4 and IPv6 on port 9090 would is thus done like this:
+
+    bind = 0.0.0.0:9090
+    bind = :::9090
+
+On the other hand, binding only the loopback interface, both in IPv4 and IPv6, is done this way:
+
+    bind = 127.0.0.1:9090
+    bind = ::1:9090
 
 ## SERVICE-LEVEL OPTIONS
 
