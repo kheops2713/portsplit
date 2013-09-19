@@ -1,10 +1,10 @@
-.TH PORTSPLIT 1 "2013-09-18" TCP\ port\ multiplexer
+.TH PORTSPLIT 1 "2013-09-19" TCP\ port\ multiplexer
 .SH NAME
 .PP
 portsplit \- a TCP port multiplexer
 .SH SYNOPSIS
 .PP
-\f[B]portsplit\f[] <filename>
+\f[B]portsplit\f[] <\f[I]filename\f[]>
 .SH DESCRIPTION
 .PP
 The \f[B]portsplit\f[] program is designed to "multiplex" a TCP port,
@@ -17,6 +17,7 @@ depending on what they request upon connection.
 The principle of \f[B]portsplit\f[] is simply to listen on a (set of)
 local port(s) and decide what to do with each incoming connection based
 on the first bytes sent by the connecting client.
+It makes it comparable to the software \f[I]sslh\f[].
 .PP
 No protocol or service is hardcoded in \f[B]portsplit\f[]: its
 configuration file must contain \f[B]patterns\f[], i.e.
@@ -45,15 +46,74 @@ a locally running web server.
 \f[B]Portsplit\f[] fully supports both IPv4 and IPv6.
 .SH OPTIONS
 .PP
-\f[B]Portsplit\f[] takes only one option, which is the path to its
-configuration file.
+<\f[B]filename\f[]>
+.PP
+Path to the configuration file.
 .SH CONFIGURATION FILE
 .PP
-Fix me!
+For those who know the \f[I]stunnel\f[] software,
+\f[B]portsplit\f[]\[aq]s configuration file syntax is very similar,
+although most of the options names and values are obviously different.
+.PP
+Each line of the configuration file can be either:
+.IP \[bu] 2
+an empty line or a line starting with \[aq]#\[aq] (comment), both being
+ignored;
+.IP \[bu] 2
+an \[aq]option_name = option_value\[aq] pair;
+.IP \[bu] 2
+\[aq][service_name]\[aq] indicating a start of service definition,
+inside which a set of patterns and an action should be defined.
+.PP
+There are two special service names which have a particular meaning:
+.IP \[bu] 2
+the service \f[I]fallback\f[] is activated when the connecting client
+sent bytes that have no chance to match any of the other services
+defined (if no \f[I]fallback\f[] service is defined at all,
+\f[B]portsplit\f[] will simply close the connection);
+.IP \[bu] 2
+the service \f[I]timeout\f[] is activated when the connecting client did
+not match any service after some period of time (see the
+\f[I]timeout\f[] global option below) (if not defined, the connection
+will be closed).
 .SS GLOBAL OPTIONS
 .PP
-Fix me!
-.SS SERVICES
+\f[B]bind\f[] = <\f[I]IP\f[]>:<\f[I]port\f[]>
+.PP
+Specify a local address and port to bind.
+\f[I]IP\f[] can be either an IPv4 or IPv6 in their standard or shortened
+notation (for IPv6).
+This option can be specified several times.
+Both the IP and port specifications are mandatory.
+The usual wildcards apply in order to listen on all interfaces:
+\[aq]0.0.0.0\[aq] for IPv4 and \[aq]::\[aq] for IPv6.
+.PP
+Listening on all interfaces on both IPv4 and IPv6 on port 9090 is thus
+done like this:
+.IP
+.nf
+\f[C]
+bind\ =\ 0.0.0.0:9090
+bind\ =\ :::9090
+\f[]
+.fi
+.PP
+On the other hand, binding only the loopback interface, both in IPv4 and
+IPv6, is done this way:
+.IP
+.nf
+\f[C]
+bind\ =\ 127.0.0.1:9090
+bind\ =\ ::1:9090
+\f[]
+.fi
+.PP
+\f[B]maxconn\f[] = <\f[I]number\f[]>
+.PP
+\f[B]pid\f[] = <\f[I]filename\f[]>
+.PP
+\f[B]timeout\f[] = <\f[I]seconds\f[]>
+.SS SERVICE\-LEVEL OPTIONS
 .PP
 Fix me!
 .SH SIGNALS
