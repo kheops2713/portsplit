@@ -35,6 +35,11 @@ Each line of the configuration file can be either:
 * an 'option_name = option_value' pair;
 * '[service_name]' indicating a start of service definition, inside which a set of patterns and an action should be defined.
 
+There are two special service names which have a particular meaning:
+
+* the service _fallback_ is activated when the connecting client sent bytes that have no chance to match any of the other services defined (if no _fallback_ service  is defined at all, **portsplit** will simply close the connection);
+* the service _timeout_ is activated when the connecting client did not send any data for some period of time (see the _timeout_ global option below) (if not defined, the connection will be closed).
+
 ## GLOBAL OPTIONS
 
 Fix me!
