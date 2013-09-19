@@ -4,7 +4,7 @@ portsplit - a TCP port multiplexer
 
 # SYNOPSIS
 
-**portsplit** \<filename\>
+**portsplit** \<_filename_\>
 
 # DESCRIPTION
 
@@ -22,7 +22,8 @@ A set of patterns and a single action together define a **service** in the **por
 
 # OPTIONS
 
-**Portsplit** takes only one option, which is the path to its configuration file.
+| \<**filename**\>
+|       Path to the configuration file.
 
 # CONFIGURATION FILE
 
