@@ -59,6 +59,10 @@ On the other hand, binding only the loopback interface, both in IPv4 and IPv6, i
 
 **maxconn** = \<_number_\>
 
+Specify the maximum number of concurrent connections **portsplit** will accept. When the maximum number is reached, the connection will be accepted and immediately closed.
+
+Note that *portsplit** forks a new process after each new connection, unless the maximum has been reached. The forked process is in charge of matching a service and taking the corresponding action.
+
 **pid** = \<_filename_\>
 
 **timeout** = \<_seconds_\>
