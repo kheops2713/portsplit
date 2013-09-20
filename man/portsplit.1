@@ -206,13 +206,51 @@ Provide a pseudoterminal (pty) to the process started by \f[I]exec\f[].
 Defaults to \[aq]no\[aq].
 .SH SIGNALS
 .PP
-Fix me!
+The main process of \f[B]portsplit\f[] intercepts some signals.
+.PP
+\f[B]SIGTERM\f[] and \f[B]SIGINT\f[] (Ctrl\-C) make \f[B]portsplit\f[]
+remove its PID file (if defined), close file descriptors, free memory
+and exit.
+.PP
+\f[B]SIGHUP\f[] triggers the reload of the configuration file, which
+implies closing all listening sockets and re\-opening them after
+re\-reading the configuration file.
+The PID file is quickly deleted and re\-written, using the (possibly
+new) \f[I]pid\f[] setting.
+Already open connections are not closed by SIGHUP, as child processes
+ignore this signal.
 .SH LIMITATIONS
 .PP
-Fix me!
+There are known limitations in \f[B]portsplit\f[].
+.PP
+First of all, do not rely on \f[B]portsplit\f[] to differentiate
+protocols where the server is supposed to talk first.
+This is simply due to the fact that \f[B]portsplit\f[] requires the
+client to send bytes in order to decide where to forward the connection.
+All clients expecting a server to talk first will fall in the
+\f[I]timeout\f[] service and hence cannot be differentiated one from the
+other.
+.PP
+The string matching is extremely dumb.
+As explained in the \f[I]string\f[] configuration option, the start of a
+specified byte sequence has to coincide with the first bytes sent by the
+client.
+It is not possible (yet?) to match a string that would appear in the
+middle of something initially sent by the client while ignoring the
+first bytes.
+To go further, we should consider the ability to match Perl\-compatible
+Regular Expressions.
+.PP
+Many other features are lacking, including a proper daemonization and a
+proper flexible logging system.
 .SH BUGS
 .PP
-Fix me!
+In addition to the limitations, there may be bugs in what
+\f[B]portsplit\f[] is supposed to do.
+However, the main functionalities, composed of the matching system and
+the bidirectional data forwarding, have shown to be working properly.
+.PP
+Please feel free to report bugs.
 .SH SEE ALSO
 .PP
 Fix me!
