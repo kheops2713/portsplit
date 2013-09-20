@@ -92,11 +92,25 @@ Since spaces on each side of the '=' are ignored, matching a string that starts 
 
 **connect** = \<_host_\>:\<_port_\>
 
+Connects to the given _host_:_port_ pair (an IPv4 or IPv6 may also be specified). Use this option only once for each service. It is mutually exclusive with the _exec_ option.
+
+Once the connection is established, the data is transparently proxied between the client and the server. The first bytes that may have been sent by the client that allowed **portsplit** to match the service are buffered and sent to the server upon connection.
+
 **exec** = \<_command_\>
+
+Execute a command, feed its standard entry with the client's data and send its standard output to the client. Use this option only once for each service. It is mutually exclusive with the _connect_ option.
+
+The first bytes that may have been sent by the client that allowed **portsplit** to match the service are buffered and sent to the new process' standard entry as soon as the process is started.
+
+The new process is started using the standard fork-exec method.
 
 **execarg** = \<_string_\>
 
+Specify one (and only one) argument to the command given in the _exec_ option. It may be used several times and may contain spaces. Arguments are passed to the command in the same order as they appear in the configuration.
+
 **pty** = yes|no
+
+Provide a pseudoterminal (pty) to the process started by _exec_. Defaults to 'no'.
 
 # SIGNALS
 
