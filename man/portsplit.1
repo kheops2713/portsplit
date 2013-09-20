@@ -1,4 +1,4 @@
-.TH PORTSPLIT 1 "2013-09-19" TCP\ port\ multiplexer
+.TH PORTSPLIT 1 "2013-09-20" TCP\ port\ multiplexer
 .SH NAME
 .PP
 portsplit \- a TCP port multiplexer
@@ -60,22 +60,25 @@ Each line of the configuration file can be either:
 an empty line or a line starting with \[aq]#\[aq] (comment), both being
 ignored;
 .IP \[bu] 2
-an \[aq]option_name = option_value\[aq] pair;
+an \[aq]option_name = option_value\[aq] pair (all blank spaces just
+before and just after the \[aq]=\[aq] are ignored);
 .IP \[bu] 2
 \[aq][service_name]\[aq] indicating a start of service definition,
 inside which a set of patterns and an action should be defined.
 .PP
-There are two special service names which have a particular meaning:
+There are two special services:
 .IP \[bu] 2
 the service \f[I]fallback\f[] is activated when the connecting client
 sent bytes that have no chance to match any of the other services
 defined (if no \f[I]fallback\f[] service is defined at all,
-\f[B]portsplit\f[] will simply close the connection);
+\f[B]portsplit\f[] will close the connection);
 .IP \[bu] 2
 the service \f[I]timeout\f[] is activated when the connecting client did
-not match any service after some period of time (see the
-\f[I]timeout\f[] global option below) (if not defined, the connection
-will be closed).
+not match any service after some amount of time (see \f[I]timeout\f[]
+option below) but could theoretically match one if it sent more bytes,
+for instance when the client did not send any data at all because it is
+using a server\-talk\-first protocol (if not defined, the connection
+will be closed if the timeout is hit).
 .SS GLOBAL OPTIONS
 .PP
 \f[B]bind\f[] = <\f[I]IP\f[]>:<\f[I]port\f[]>
@@ -110,12 +113,97 @@ bind\ =\ ::1:9090
 .PP
 \f[B]maxconn\f[] = <\f[I]number\f[]>
 .PP
+Specify the maximum number of concurrent connections \f[B]portsplit\f[]
+will accept.
+When the maximum number is reached, the connection will be accepted and
+immediately closed.
+.PP
+Note that \f[B]portsplit\f[] forks a new process after each new
+connection, unless the maximum has been reached.
+The forked process is in charge of matching a service and taking the
+corresponding action.
+.PP
 \f[B]pid\f[] = <\f[I]filename\f[]>
 .PP
+Specify a filename that will contain the PID of \f[B]portsplit\f[]\[aq]s
+main process.
+It can be used to send signals to \f[B]portsplit\f[] such as HUP and
+TERM to respectively re\-read the configuration and exit the program.
+.PP
 \f[B]timeout\f[] = <\f[I]seconds\f[]>
+.PP
+Specify the number of seconds after which the \f[I]timeout\f[] service
+must be engaged if the client did not send enough data to match a
+service nor to be sure that no service at all can be matched (in which
+case the \f[I]fallback\f[] service would have been used).
 .SS SERVICE\-LEVEL OPTIONS
 .PP
-Fix me!
+At the service level, two types of options are distinguished and they
+define respectively:
+.IP \[bu] 2
+which data to expect from a client in order to activate the given
+service (\f[I]matching\f[] options);
+.IP \[bu] 2
+what to do once the service has been matched (\f[I]action\f[] options);
+.SS Matching Options
+.PP
+\f[B]string\f[] = <\f[I]byte\f[] \f[I]sequence\f[]>
+.PP
+Will activate the service if the data sent by the client \f[B]starts
+with\f[] \f[I]byte\f[] \f[I]sequence\f[].
+It is important to remember that this sequence is compared exactly to
+the first bytes sent by the client.
+That is, if we want to match a client that sends \[aq]GET /
+HTTP/1.1\[aq], we must not use \[aq]HTTP\[aq] in \f[I]byte\f[]
+\f[I]sequence\f[] but \[aq]GET\[aq].
+.PP
+It is possible to specify non\-printable bytes by using the syntax
+\[aq]\\\f[I]XX\f[]\[aq] where \f[I]XX\f[] is the byte\[aq]s hexadecimal
+code.
+.PP
+Since spaces on each side of the \[aq]=\[aq] are ignored, matching a
+string that starts with a space must be done by using its hexadecimal
+code, \[aq]\\20\[aq].
+.SS Action Options
+.PP
+\f[B]connect\f[] = <\f[I]host\f[]>:<\f[I]port\f[]>
+.PP
+Connects to the given \f[I]host\f[]:\f[I]port\f[] pair (an IPv4 or IPv6
+may also be specified).
+Use this option only once for each service.
+It is mutually exclusive with the \f[I]exec\f[] option.
+.PP
+Once the connection is established, the data is transparently proxied
+between the client and the server.
+The first bytes that may have been sent by the client that allowed
+\f[B]portsplit\f[] to match the service are buffered and sent to the
+server upon connection.
+.PP
+\f[B]exec\f[] = <\f[I]command\f[]>
+.PP
+Execute a command, feed its standard entry with the client\[aq]s data
+and send its standard output to the client.
+Use this option only once for each service.
+It is mutually exclusive with the \f[I]connect\f[] option.
+.PP
+The first bytes that may have been sent by the client that allowed
+\f[B]portsplit\f[] to match the service are buffered and sent to the new
+process\[aq] standard entry as soon as the process is started.
+.PP
+The new process is started using the standard fork\-exec method.
+.PP
+\f[B]execarg\f[] = <\f[I]string\f[]>
+.PP
+Specify one (and only one) argument to the command given in the
+\f[I]exec\f[] option.
+It may be used several times and may contain spaces.
+Arguments are passed to the command in the same order as they appear in
+the configuration.
+.PP
+\f[B]pty\f[] = yes|no
+.PP
+Provide a pseudoterminal (pty) to the process started by \f[I]exec\f[].
+Defaults to \[aq]no\[aq].
 .SH SIGNALS
 .PP
 Fix me!
