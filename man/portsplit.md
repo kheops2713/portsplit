@@ -39,7 +39,7 @@ Each line of the configuration file can be either:
 There are two special services:
 
 * the service _fallback_ is activated when the connecting client sent bytes that have no chance to match any of the other services defined (if no _fallback_ service  is defined at all, **portsplit** will close the connection);
-* the service _timeout_ is activated when the connecting client did not match any service after some amount of time (see _timeout_ option below) but could theoretically match one if it sent more bytes, for instance when the client did not send any data at all because it is using a server-talk-first protocol (if not defined, the connection will be closed).
+* the service _timeout_ is activated when the connecting client did not match any service after some amount of time (see _timeout_ option below) but could theoretically match one if it sent more bytes, for instance when the client did not send any data at all because it is using a server-talk-first protocol (if not defined, the connection will be closed if the timeout is hit).
 
 ## GLOBAL OPTIONS
 
