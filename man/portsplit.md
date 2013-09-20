@@ -33,7 +33,7 @@ For those who know the _stunnel_ software, **portsplit**'s configuration file sy
 Each line of the configuration file can be either:
 
 * an empty line or a line starting with '#' (comment), both being ignored;
-* an 'option_name = option_value' pair;
+* an 'option_name = option_value' pair (all blank spaces just before and just after the '=' are ignored);
 * '[service_name]' indicating a start of service definition, inside which a set of patterns and an action should be defined.
 
 There are two special services:
@@ -80,7 +80,13 @@ At the service level, two types of options are distinguished and they define res
 
 ### Matching Options
 
-**string** = \<_byte sequence_\>
+**string** = \<_byte_ _sequence_\>
+
+Will activate the service if the data sent by the client **starts with** _byte_ _sequence_. It is important to remember that this sequence is compared exactly to the first bytes sent by the client. That is, if we want to match a client that sends 'GET / HTTP/1.1', we must not use 'HTTP' in _byte_ _sequence_ but 'GET'.
+
+It is possible to specify non-printable bytes by using the syntax '\\_XX_' where _XX_ is the byte's hexadecimal code.
+
+Since spaces on each side of the '=' are ignored, matching a string that starts with a space must be done by using '\\20'.
 
 ### Action Options
 
