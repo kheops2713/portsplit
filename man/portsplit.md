@@ -36,10 +36,10 @@ Each line of the configuration file can be either:
 * an 'option_name = option_value' pair;
 * '[service_name]' indicating a start of service definition, inside which a set of patterns and an action should be defined.
 
-There are two special service names which have a particular meaning:
+There are two special services:
 
-* the service _fallback_ is activated when the connecting client sent bytes that have no chance to match any of the other services defined (if no _fallback_ service  is defined at all, **portsplit** will simply close the connection);
-* the service _timeout_ is activated when the connecting client did not match any service after some period of time (see the _timeout_ global option below) (if not defined, the connection will be closed).
+* the service _fallback_ is activated when the connecting client sent bytes that have no chance to match any of the other services defined (if no _fallback_ service  is defined at all, **portsplit** will close the connection);
+* the service _timeout_ is activated when the connecting client did not match any service after some amount of time (see _timeout_ option below) but could theoretically match one if it sent more bytes, for instance when the client did not send any data at all because it is using a server-talk-first protocol (if not defined, the connection will be closed).
 
 ## GLOBAL OPTIONS
 
@@ -65,7 +65,11 @@ Note that *portsplit** forks a new process after each new connection, unless the
 
 **pid** = \<_filename_\>
 
+Specify a filename that will contain the PID of **portsplit**'s main process. It can be used to send signals to **portsplit** such as HUP and TERM to respectively re-read the configuration and exit the program.
+
 **timeout** = \<_seconds_\>
+
+Specify the number of seconds after which the _timeout_ service must be engaged if the client did not send enough data to match a service nor to be sure that no service at all can be matched (in which case the _fallback_ service would be used).
 
 ## SERVICE-LEVEL OPTIONS
 
