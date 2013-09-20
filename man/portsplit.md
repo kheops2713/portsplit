@@ -69,11 +69,28 @@ Specify a filename that will contain the PID of **portsplit**'s main process. It
 
 **timeout** = \<_seconds_\>
 
-Specify the number of seconds after which the _timeout_ service must be engaged if the client did not send enough data to match a service nor to be sure that no service at all can be matched (in which case the _fallback_ service would be used).
+Specify the number of seconds after which the _timeout_ service must be engaged if the client did not send enough data to match a service nor to be sure that no service at all can be matched (in which case the _fallback_ service would have been used).
 
 ## SERVICE-LEVEL OPTIONS
 
-Fix me!
+At the service level, two types of options are distinguished and they define respectively:
+
+* which data to expect from a client in order to activate the given service (_matching_ options);
+* what to do once the service has been matched (_action_ options);
+
+### Matching Options
+
+**string** = \<_byte sequence_\>
+
+### Action Options
+
+**connect** = \<_host_\>:\<_port_\>
+
+**exec** = \<_command_\>
+
+**execarg** = \<_string_\>
+
+**pty** = yes|no
 
 # SIGNALS
 
