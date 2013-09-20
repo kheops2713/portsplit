@@ -86,7 +86,7 @@ Will activate the service if the data sent by the client **starts with** _byte_ 
 
 It is possible to specify non-printable bytes by using the syntax '\\_XX_' where _XX_ is the byte's hexadecimal code.
 
-Since spaces on each side of the '=' are ignored, matching a string that starts with a space must be done by using '\\20'.
+Since spaces on each side of the '=' are ignored, matching a string that starts with a space must be done by using its hexadecimal code, '\\20'.
 
 ### Action Options
 
