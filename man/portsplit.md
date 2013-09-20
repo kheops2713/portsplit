@@ -114,15 +114,27 @@ Provide a pseudoterminal (pty) to the process started by _exec_. Defaults to 'no
 
 # SIGNALS
 
-Fix me!
+The main process of **portsplit** intercepts some signals.
+
+**SIGTERM** and **SIGINT** (Ctrl-C) make **portsplit** remove its PID file (if defined), close file descriptors, free memory and exit.
+
+**SIGHUP** triggers the reload of the configuration file, which implies closing all listening sockets and re-opening them after re-reading the configuration file. The PID file is quickly deleted and re-written, using the (possibly new) _pid_ setting. Already open connections are not closed by SIGHUP, as child processes ignore this signal.
 
 # LIMITATIONS
 
-Fix me!
+There are known limitations in **portsplit**.
+
+First of all, do not rely on **portsplit** to differentiate protocols where the server is supposed to talk first. This is simply due to the fact that **portsplit** requires the client to send bytes in order to decide where to forward the connection. All clients expecting a server to talk first will fall in the _timeout_ service and hence cannot be differentiated one from the other.
+
+The string matching is extremely dumb. As explained in the _string_ configuration option, the start of a specified byte sequence has to coincide with the first bytes sent by the client. It is not possible (yet?) to match a string that would appear in the middle of something initially sent by the client while ignoring the first bytes. To go further, we should consider the ability to match Perl-compatible Regular Expressions.
+
+Many other features are lacking, including a proper daemonization and a proper flexible logging system.
 
 # BUGS
 
-Fix me!
+In addition to the limitations, there may be bugs in what **portsplit** is supposed to do. However, the main functionalities, composed of the matching system and the bidirectional data forwarding, have shown to be working properly.
+
+Please feel free to report bugs.
 
 # SEE ALSO
 
