@@ -110,7 +110,7 @@ The new process is started using the standard fork-exec method.
 
 **execarg** = \<_string_\>
 
-Specify one (and only one) argument to the command given in the _exec_ option. It may be used several times and may contain spaces. Arguments are passed to the command in the same order as they appear in the configuration.
+Specify one (and only one) argument to the command given in the _exec_ option. Use several times to pass several arguments to the executed command. Arguments are passed to the command in the same order as they appear in the configuration.
 
 **pty** = yes|no
 
