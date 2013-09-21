@@ -124,11 +124,11 @@ The main process of **portsplit** intercepts some signals.
 
 There are known limitations in **portsplit**.
 
-First of all, do not rely on **portsplit** to differentiate protocols where the server is supposed to talk first. This is simply due to the fact that **portsplit** requires the client to send bytes in order to decide where to forward the connection. All clients expecting a server to talk first will fall in the _timeout_ service and hence cannot be differentiated one from the other.
+First of all, **portsplit** cannot differentiate protocols where the server is supposed to talk first. This is simply due to the fact that **portsplit** requires the client to send bytes in order to decide where to forward the connection. All clients expecting a server to talk first will fall in the _timeout_ service and hence cannot be differentiated one from the other.
 
-The string matching is extremely dumb. As explained in the _string_ configuration option, the start of a specified byte sequence has to coincide with the first bytes sent by the client. It is not possible (yet?) to match a string that would appear in the middle of something initially sent by the client while ignoring the first bytes. To go further, we should consider the ability to match Perl-compatible Regular Expressions.
+The string matching is extremely dumb. As explained in the _string_ configuration option, a specified byte sequence has to coincide with the very first bytes sent by the client. It is not possible (yet?) to match a string that would appear in the middle of something initially sent by the client while ignoring the first bytes. To go further, we should also consider the ability to match Perl-compatible Regular Expressions.
 
-Many other features are lacking, including a proper daemonization and a proper flexible logging system.
+Many other features are lacking, including a proper daemonization, a proper flexible logging system and UDP support.
 
 # BUGS
 
