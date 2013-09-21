@@ -145,25 +145,32 @@ which data to expect from a client in order to activate the given
 service (\f[I]matching\f[] options);
 .IP \[bu] 2
 what to do once the service has been matched (\f[I]action\f[] options);
+.PP
+For the special services \f[I]timeout\f[] and \f[I]fallback\f[], it does
+not make sense to define matching options.
 .SS Matching Options
 .PP
 \f[B]string\f[] = <\f[I]byte\f[] \f[I]sequence\f[]>
 .PP
-Will activate the service if the data sent by the client \f[B]starts
-with\f[] \f[I]byte\f[] \f[I]sequence\f[].
-It is important to remember that this sequence is compared exactly to
-the first bytes sent by the client.
+Will activate the service if the data sent by the client starts with
+\f[I]byte\f[] \f[I]sequence\f[].
+This sequence is compared exactly to the very first bytes sent by the
+client.
 That is, if we want to match a client that sends \[aq]GET /
 HTTP/1.1\[aq], we must not use \[aq]HTTP\[aq] in \f[I]byte\f[]
-\f[I]sequence\f[] but \[aq]GET\[aq].
+\f[I]sequence\f[] but, for instance, \[aq]GET\[aq].
 .PP
 It is possible to specify non\-printable bytes by using the syntax
 \[aq]\\\f[I]XX\f[]\[aq] where \f[I]XX\f[] is the byte\[aq]s hexadecimal
 code.
 .PP
-Since spaces on each side of the \[aq]=\[aq] are ignored, matching a
-string that starts with a space must be done by using its hexadecimal
-code, \[aq]\\20\[aq].
+Since spaces on each side of the \[aq]=\[aq] are ignored by the
+configuration parser, matching a string that starts with a space must be
+done by using its hexadecimal code, \[aq]\\20\[aq].
+.PP
+This option can be used several times, in which case a matching with any
+of the specified strings will be accepted to activate the service (as in
+a logical \[aq]OR\[aq]).
 .SS Action Options
 .PP
 \f[B]connect\f[] = <\f[I]host\f[]>:<\f[I]port\f[]>
@@ -196,7 +203,7 @@ The new process is started using the standard fork\-exec method.
 .PP
 Specify one (and only one) argument to the command given in the
 \f[I]exec\f[] option.
-It may be used several times and may contain spaces.
+Use several times to pass several arguments to the executed command.
 Arguments are passed to the command in the same order as they appear in
 the configuration.
 .PP
