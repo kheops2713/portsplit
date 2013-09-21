@@ -132,7 +132,7 @@ Many other features are lacking, including a proper daemonization and a proper f
 
 # BUGS
 
-In addition to the limitations, there may be bugs in what **portsplit** is supposed to do. However, the main functionalities, composed of the matching system and the bidirectional data forwarding, have shown to be working properly.
+In addition to the limitations, there may be bugs in what **portsplit** is supposed to do. However, the main functionalities, composed of the matching system and the bidirectional data forwarding, are believed to be working properly.
 
 Please feel free to report bugs.
 
