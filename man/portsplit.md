@@ -88,7 +88,7 @@ Will activate the service if the data sent by the client starts with _byte_ _seq
 
 It is possible to specify non-printable bytes by using the syntax '\\_XX_' where _XX_ is the byte's hexadecimal code.
 
-Since spaces on each side of the '=' are ignored, matching a string that starts with a space must be done by using its hexadecimal code, '\\20'.
+Since spaces on each side of the '=' are ignored by the configuration parser, matching a string that starts with a space must be done by using its hexadecimal code, '\\20'.
 
 This option can be used several times, in which case a matching with any of the specified strings will be accepted to activate the service (as in a logical 'OR').
 
