@@ -78,6 +78,8 @@ At the service level, two types of options are distinguished and they define res
 * which data to expect from a client in order to activate the given service (_matching_ options);
 * what to do once the service has been matched (_action_ options);
 
+For the special services _timeout_ and _fallback_, it does not make sense to define matching options.
+
 ### Matching Options
 
 **string** = \<_byte_ _sequence_\>
