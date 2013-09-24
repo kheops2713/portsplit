@@ -23,10 +23,13 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <sys/select.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <pty.h>
+
+#define USEC_MAX 1000000
 
 int treat_client (int clientfd, struct sockaddr const *inbound, int family, config const *_cfg)
 {
@@ -35,7 +38,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
   unsigned int ipv = 0, readbuflen, prefill, nbytes, rbytes, matched_pattern;
   int maxfd;
   char *prebuffer, *readbuffer, *toflush;
-  struct timeval stimeout, *ptimeout;
+  struct timeval stimeout, *ptimeout, elapsed, t0, tcur;
   int serverread, serverwrite, selret, terminate, overflow, established, fwd, couldmatch = 0;
   ssize_t r, w;
   fd_set fdset;
@@ -83,6 +86,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
   terminate = 0;
   established = 0;
   overflow = 0;
+  gettimeofday (&t0, NULL);
   while (!terminate && (selret = select (maxfd + 1, &fdset, NULL, NULL, ptimeout)) >= 0)
     {
       if (selret == 0) /* timeout */
@@ -245,8 +249,19 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 
 	  if (!established && ptimeout != NULL)
 	    {
+              /* old code: we used to reset the timer
 	      ptimeout->tv_usec = 0;
 	      ptimeout->tv_sec = cfg->timeout;
+              */
+              /*
+               * we compute how much is elapsed from the original timeout and set the new select() timeout accordingly
+               * these are simply time addition and substraction in respect with struct timeval
+               */
+              gettimeofday (&tcur, NULL);
+              elapsed.tv_sec = tcur.tv_sec - t0.tv_sec - ((int)(tcur.tv_usec < t0.tv_usec));
+              elapsed.tv_usec = ((tcur.tv_usec < t0.tv_usec) ? (USEC_MAX - (t0.tv_usec - tcur.tv_usec)) : (tcur.tv_usec - t0.tv_usec));
+              ptimeout->tv_sec = cfg->timeout.tv_sec - elapsed.tv_sec - ((int)(elapsed.tv_usec > cfg->timeout.tv_usec));
+              ptimeout->tv_usec = ((elapsed.tv_usec > cfg->timeout.tv_usec) ? (USEC_MAX -(elapsed.tv_usec - cfg->timeout.tv_usec)) : (cfg->timeout.tv_usec - elapsed.tv_usec));
 	    }
 	  else if (established)
 	    {
