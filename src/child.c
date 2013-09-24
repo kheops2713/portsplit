@@ -260,8 +260,8 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
               gettimeofday (&tcur, NULL);
               elapsed.tv_sec = tcur.tv_sec - t0.tv_sec - ((int)(tcur.tv_usec < t0.tv_usec));
               elapsed.tv_usec = ((tcur.tv_usec < t0.tv_usec) ? (USEC_MAX - (t0.tv_usec - tcur.tv_usec)) : (tcur.tv_usec - t0.tv_usec));
-              ptimeout->tv_sec = cfg->timeout.tv_sec - elapsed.tv_sec - ((int)(elapsed.tv_usec > cfg->timeout.tv_usec));
-              ptimeout->tv_usec = ((elapsed.tv_usec > cfg->timeout.tv_usec) ? (USEC_MAX -(elapsed.tv_usec - cfg->timeout.tv_usec)) : (cfg->timeout.tv_usec - elapsed.tv_usec));
+              ptimeout->tv_sec = stimeout.tv_sec - elapsed.tv_sec - ((int)(elapsed.tv_usec > stimeout.tv_usec));
+              ptimeout->tv_usec = ((elapsed.tv_usec > stimeout.tv_usec) ? (USEC_MAX -(elapsed.tv_usec - stimeout.tv_usec)) : (stimeout.tv_usec - elapsed.tv_usec));
 	    }
 	  else if (established)
 	    {
