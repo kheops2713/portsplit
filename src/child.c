@@ -38,7 +38,7 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
   unsigned int ipv = 0, readbuflen, prefill, nbytes, rbytes, matched_pattern;
   int maxfd;
   char *prebuffer, *readbuffer, *toflush;
-  struct timeval stimeout, *ptimeout, elapsed, t0, tcur;
+  struct timeval stimeout, *ptimeout, timeout_init, elapsed, t0, tcur;
   int serverread, serverwrite, selret, terminate, overflow, established, fwd, couldmatch = 0;
   ssize_t r, w;
   fd_set fdset;
@@ -49,8 +49,8 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
   cfg = malloc (sizeof(config));
   copy_config (cfg, _cfg);
 
-  stimeout.tv_sec = cfg->timeout;
-  stimeout.tv_usec = 0;
+  stimeout.tv_sec = timeout_init.tv_sec = cfg->timeout;
+  stimeout.tv_usec = timeout_init.tv_usec = 0;
 
   if (cfg->timeout)
     ptimeout = &stimeout;
@@ -260,8 +260,8 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
               gettimeofday (&tcur, NULL);
               elapsed.tv_sec = tcur.tv_sec - t0.tv_sec - ((int)(tcur.tv_usec < t0.tv_usec));
               elapsed.tv_usec = ((tcur.tv_usec < t0.tv_usec) ? (USEC_MAX - (t0.tv_usec - tcur.tv_usec)) : (tcur.tv_usec - t0.tv_usec));
-              ptimeout->tv_sec = stimeout.tv_sec - elapsed.tv_sec - ((int)(elapsed.tv_usec > stimeout.tv_usec));
-              ptimeout->tv_usec = ((elapsed.tv_usec > stimeout.tv_usec) ? (USEC_MAX -(elapsed.tv_usec - stimeout.tv_usec)) : (stimeout.tv_usec - elapsed.tv_usec));
+              ptimeout->tv_sec = timeout_init.tv_sec - elapsed.tv_sec - ((int)(elapsed.tv_usec > timeout_init.tv_usec));
+              ptimeout->tv_usec = ((elapsed.tv_usec > timeout_init.tv_usec) ? (USEC_MAX - (elapsed.tv_usec - timeout_init.tv_usec)) : (timeout_init.tv_usec - elapsed.tv_usec));
 	    }
 	  else if (established)
 	    {
