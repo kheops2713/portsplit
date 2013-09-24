@@ -39,7 +39,7 @@ Each line of the configuration file can be either:
 There are two special services:
 
 * the service _fallback_ is activated when the connecting client sent bytes that have no chance to match any of the other services defined (if no _fallback_ service  is defined at all, **portsplit** will close the connection);
-* the service _timeout_ is activated when the connecting client did not match any service after some amount of time (see _timeout_ option below) but could theoretically match one if it sent more bytes, for instance when the client did not send any data at all because it is using a server-talk-first protocol (if not defined, the connection will be closed if the timeout is hit).
+* the service _timeout_ is activated when the connecting client did not match any service after some amount of time (see _timeout_ option below) following its connection but could theoretically match one if it sent more bytes, for instance when the client did not send any data at all because it is using a server-talk-first protocol (if not defined, the connection will be closed if the timeout is hit).
 
 ## GLOBAL OPTIONS
 
@@ -69,7 +69,7 @@ Specify a filename that will contain the PID of **portsplit**'s main process. It
 
 **timeout** = \<_seconds_\>
 
-Specify the number of seconds after which the _timeout_ service must be engaged if the client did not send enough data to match a service nor to be sure that no service at all can be matched (in which case the _fallback_ service would have been used).
+Specify the number of seconds after which the _timeout_ service must be engaged if the client did not send enough data to match a service nor to be sure that no service at all can be matched (in which case the _fallback_ service would have been used). The countdown starts as soon as we start waiting for data from the client.
 
 ## SERVICE-LEVEL OPTIONS
 

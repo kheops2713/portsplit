@@ -39,9 +39,11 @@ alone on a line.
 There are two special services:
 - "fallback" is chosen when the client sent something that did not
   match any of the other services and has no chance to match any of
-  them with more bytes.
-- "timeout" is chosen when the client connected but did not send any
-  data after some amount of time (configurable).
+  them with more bytes;
+- "timeout" is chosen when no service has matched nor was it sure that
+  no service at all could be matched (in which case "fallback" would
+  have been chosen) after a configurable amount of time since the
+  client's connection.
 
 
 Limitations

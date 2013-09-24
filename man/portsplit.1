@@ -75,10 +75,10 @@ defined (if no \f[I]fallback\f[] service is defined at all,
 .IP \[bu] 2
 the service \f[I]timeout\f[] is activated when the connecting client did
 not match any service after some amount of time (see \f[I]timeout\f[]
-option below) but could theoretically match one if it sent more bytes,
-for instance when the client did not send any data at all because it is
-using a server\-talk\-first protocol (if not defined, the connection
-will be closed if the timeout is hit).
+option below) following its connection but could theoretically match one
+if it sent more bytes, for instance when the client did not send any
+data at all because it is using a server\-talk\-first protocol (if not
+defined, the connection will be closed if the timeout is hit).
 .SS GLOBAL OPTIONS
 .PP
 \f[B]bind\f[] = <\f[I]IP\f[]>:<\f[I]port\f[]>
@@ -136,6 +136,8 @@ Specify the number of seconds after which the \f[I]timeout\f[] service
 must be engaged if the client did not send enough data to match a
 service nor to be sure that no service at all can be matched (in which
 case the \f[I]fallback\f[] service would have been used).
+The countdown starts as soon as we start waiting for data from the
+client.
 .SS SERVICE\-LEVEL OPTIONS
 .PP
 At the service level, two types of options are distinguished and they
