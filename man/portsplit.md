@@ -65,7 +65,7 @@ Note that **portsplit** forks a new process after each new connection, unless th
 
 **pid** = \<_filename_\>
 
-Specify a filename that will contain the PID of **portsplit**'s main process. It can be used to send signals to **portsplit** such as HUP and TERM to respectively re-read the configuration and exit the program.
+Specify a filename that will contain the PID of **portsplit**'s main process. The file is present as long as **portsplit** is running, and is deleted when the program terminates normally. It can thus be used to test if the program is running and to send signals such as HUP and TERM to respectively re-read the configuration and exit the program.
 
 **timeout** = \<_seconds_\>
 

@@ -1,4 +1,4 @@
-.TH PORTSPLIT 1 "2013-09-24" TCP\ port\ multiplexer
+.TH PORTSPLIT 1 "2013-09-25" TCP\ port\ multiplexer
 .SH NAME
 .PP
 portsplit \- a TCP port multiplexer
@@ -127,8 +127,11 @@ corresponding action.
 .PP
 Specify a filename that will contain the PID of \f[B]portsplit\f[]\[aq]s
 main process.
-It can be used to send signals to \f[B]portsplit\f[] such as HUP and
-TERM to respectively re\-read the configuration and exit the program.
+The file is present as long as \f[B]portsplit\f[] is running, and is
+deleted when the program terminates normally.
+It can thus be used to test if the program is running and to send
+signals such as HUP and TERM to respectively re\-read the configuration
+and exit the program.
 .PP
 \f[B]timeout\f[] = <\f[I]seconds\f[]>
 .PP
