@@ -249,10 +249,6 @@ int treat_client (int clientfd, struct sockaddr const *inbound, int family, conf
 
 	  if (!established && ptimeout != NULL)
 	    {
-              /* old code: we used to reset the timer
-	      ptimeout->tv_usec = 0;
-	      ptimeout->tv_sec = cfg->timeout;
-              */
               /*
                * we compute how much is elapsed from the original timeout and set the new select() timeout accordingly
                * these are simply time addition and substraction in respect with struct timeval
