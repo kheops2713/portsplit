@@ -140,7 +140,7 @@ must be engaged if the client did not send enough data to match a
 service nor to be sure that no service at all can be matched (in which
 case the \f[I]fallback\f[] service would have been used).
 The countdown starts as soon as we start waiting for data from the
-client.
+client and is interrupted only when a service is matched.
 .SS SERVICE\-LEVEL OPTIONS
 .PP
 At the service level, two types of options are distinguished and they

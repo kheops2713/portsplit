@@ -69,7 +69,7 @@ Specify a filename that will contain the PID of **portsplit**'s main process. Th
 
 **timeout** = \<_seconds_\>
 
-Specify the number of seconds after which the _timeout_ service must be engaged if the client did not send enough data to match a service nor to be sure that no service at all can be matched (in which case the _fallback_ service would have been used). The countdown starts as soon as we start waiting for data from the client.
+Specify the number of seconds after which the _timeout_ service must be engaged if the client did not send enough data to match a service nor to be sure that no service at all can be matched (in which case the _fallback_ service would have been used). The countdown starts as soon as we start waiting for data from the client and is interrupted only when a service is matched.
 
 ## SERVICE-LEVEL OPTIONS
 
