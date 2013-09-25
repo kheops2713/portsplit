@@ -1,6 +1,5 @@
 # Roadmap to version 1.0.0
 - Make sure output messages are relevant, give enough info, etc.
-- Write a manpage (at least a stub)
 - Have the Makefiles work properly: include man/ subdir when manpage is written, have configure.ac fetch git tag to PACKAGE_VERSION
 - Tag version 1.0.0 with git when it's ok.
 
