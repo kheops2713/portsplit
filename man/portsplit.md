@@ -86,7 +86,7 @@ For the special services _timeout_ and _fallback_, it does not make sense to def
 
 Will activate the service if the data sent by the client starts with _byte_ _sequence_. This sequence is compared exactly to the very first bytes sent by the client. That is, if we want to match a client that sends 'GET / HTTP/1.1', we must not use 'HTTP' in _byte_ _sequence_ but, for instance, 'GET'.
 
-It is possible to specify non-printable bytes by using the syntax '\\_XX_' where _XX_ is the byte's hexadecimal code.
+It is possible to specify non-printable bytes by using the syntax '\\_XX_' where _XX_ is the byte's hexadecimal code, as described in _ascii_(7).
 
 Since spaces on each side of the '=' are ignored by the configuration parser, matching a string that starts with a space must be done by using its hexadecimal code, '\\20'.
 
