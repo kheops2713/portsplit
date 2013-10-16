@@ -1,6 +1,3 @@
-# Roadmap to version 1.0.0
-- Tag version 1.0.0 with git when it's ok.
-
 # Going further
 - Daemonization
 - Proper logging, both to logfile (first priority) and syslog (second priority)
