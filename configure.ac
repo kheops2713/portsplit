@@ -2,8 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 define(VERSION_ID,esyscmd([
-	V=`git show --format=%H | head -n 1`;
-	echo git-$V | tr -d '\n';
+	V=`git describe 2>/dev/null`;
+	[ -z "$V" ] && V=git-`git show --format=%H | head -n 1`;
+	echo $V | tr -d '\n';
 ]))
 
 AC_PREREQ([2.69])
