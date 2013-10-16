@@ -1,3 +1,11 @@
-Changes in version 1.0.0-rc0
+Changes in version 1.0.0-rc1 - 2013-10-16
+  This second release fixes a packaging issue which prevented the
+  manpage from being included by 'make dist'.
+
+  o Packaging:
+    - man/portsplit.1 manpage is now included in package by 'make
+      dist'.
+
+Changes in version 1.0.0-rc0 - 2013-10-16
   This is the initial packaged release of Portsplit. The features
   described in the manpage are believed to be all working accordingly.
