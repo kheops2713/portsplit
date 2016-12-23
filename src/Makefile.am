@@ -8,8 +8,8 @@ portsplit_SOURCES = \
 		sigs.c
 
 AM_CFLAGS = \
-	-ansi \
 	-pedantic \
+	-std=c11 \
 	-O2 \
 	-Wchar-subscripts \
 	-Wcomment \
@@ -47,5 +47,4 @@ AM_CFLAGS = \
 	-Wlong-long \
 	-Wunreachable-code \
 	-Wno-missing-braces \
-	-Wno-missing-field-initializers \
-	-D_POSIX_C_SOURCE=199309L
+	-Wno-missing-field-initializers
