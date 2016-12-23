@@ -9,7 +9,7 @@ portsplit_SOURCES = \
 
 AM_CFLAGS = \
 	-pedantic \
-	-std=c11 \
+	-std=gnu11 \
 	-O2 \
 	-Wchar-subscripts \
 	-Wcomment \
